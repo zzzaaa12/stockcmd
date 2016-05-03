@@ -4,6 +4,7 @@ import sys
 import csv
 import json
 import requests
+import re
 
 server = '220.229.103.179'
 url = 'http://' + server + '/stock/api/getStockInfo.jsp?ex_ch='
@@ -20,13 +21,14 @@ def usage():
     print '    stockcmd.py [Options] [stock numbers]'
     print ''
     print 'Options:'
-    print '    -a: list include TSE index and OTC index'
+    print '    -i: list include TSE index and OTC index'
+    print '    -w: list International Stock Indexes'
     print ''
     print 'Example:'
     print '    stockcmd.py -a 2330 2317 3008'
     print ''
 
-def search_stock (stock_no, filename):
+def search_stock(stock_no, filename):
     ret = False
 
     f = open(filename,'r')
@@ -37,6 +39,30 @@ def search_stock (stock_no, filename):
     f.close()
     return ret
 
+def remove_special_char(string):
+    return re.sub(r'[^\x00-\x7F]','', string)
+
+def world_index():
+    url = 'http://www.google.com/finance/info?q=INDEXDJX:.DJI,INDEXNASDAQ:.IXIC,INDEXDB:DAX,INDEXNIKKEI:NI225,KRX:KOSPI,SHA:000001,INDEXHANGSENG:HSI,INDEXFTSE:UKX'
+    result = requests.get(url)
+    json_str = remove_special_char(result.content.replace('// ', '', 1))
+
+    # read json data
+    json_data = json.loads(json_str)
+
+    print u'指數\t\t點數\t\t漲跌\t\t百分比'
+    for i in range(0, 7, 1):
+        j = json_data[i]
+        name = j["t"]
+
+        if name == '.DJI':
+            name = 'DOW'
+        elif name == '.IXIC':
+            name = 'NASDAQ'
+        elif name == '000001':
+            name = 'SHCOMP'
+
+        print name + '\t\t' + j["l"] + '\t' + j["c"] + '\t\t' + j["cp"] + '%'
 
 if len(argv) == 1:
     usage()
@@ -47,11 +73,16 @@ elif len(argv) > 1:
     i = 0
 
     for x in argv:
+
+        if str(x) == '-w':
+            world_index()
+            exit()
+
         if str(x) == '-h' or str(x) == '--help':
             usage()
             exit()
 
-        if str(x) == '-a':
+        if str(x) == '-i':
             url = url + 'tse_t00.tw|otc_o00.tw|'
             count += 2
             del argv[i]
