@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 import sys
 import csv
 import json
@@ -7,10 +8,10 @@ import requests
 server = '220.229.103.179'
 url = 'http://' + server + '/stock/api/getStockInfo.jsp?ex_ch='
 argv = sys.argv
-index = 0
+count = 0
 tse_file = 'tse.csv'
 otc_file = 'otc.csv'
-stock_list = 'stocl_list.txt'
+stock_list = 'stock_list.txt'
 
 def search_number (stock_no, filename):
     ret = 0
@@ -26,12 +27,20 @@ def search_number (stock_no, filename):
 
 if len(argv) == 1:
     url = url + 'tse_t00.tw|otc_o00.tw'
-    index += 2
+    count += 2
 
 elif len(argv) > 1:
     del argv[0]
+    i = 0
 
-    for x in (argv):
+    for x in argv:
+        if str(x) == '-a':
+            url = url + 'tse_t00.tw|otc_o00.tw|'
+            count += 2
+            del argv[i]
+        i += 1
+
+    for x in argv:
         if search_number(str(x), otc_file) == 1:
             url = url + 'otc_' + str(x) + '.tw|'
         elif search_number(str(x), tse_file) == 1:
@@ -39,7 +48,7 @@ elif len(argv) > 1:
         else:
             print 'Error: Cannot find stock ' + str(x) + ' name in files'
             continue
-        index += 1
+        count += 1
 
 # access the index first and then send request for stock list
 r = requests.session()
@@ -48,9 +57,9 @@ result = r.get(url)
 
 # read json data
 json_data = json.loads(result.content)
-print 'No.\tName\tPrice\tChange\t   %\tVolume\t  Time'
+print u'股號\t股名\t成交價\t漲跌\t   %\t成交量\t  時間'
 
-for i in range(0, index, 1):
+for i in range(0, count, 1):
     j = json_data['msgArray'][i]
 
     diff = float(j["z"]) - float(j["y"])
@@ -62,4 +71,13 @@ for i in range(0, index, 1):
     change_str = sign + str(diff)
     change_str_p = sign + '{0:.2f}'.format(diff / float(j["y"]) *100)
 
-    print j["c"] + '\t' + j["n"] + '\t' + j["z"] + '\t' + change_str + '\t' + change_str_p + '%\t' + j["v"] + '\t' + j["t"]
+    stock_no = j["c"]
+    name = j["n"]
+
+    # fix too long name.....
+    if stock_no == 't00':
+        name = u'上市'
+    elif stock_no == 'o00':
+        name = u'上櫃'
+
+    print j["c"] + '\t' + name + '\t' + j["z"] + '\t' + change_str + '\t' + change_str_p + '%\t' + j["v"] + '\t' + j["t"]
