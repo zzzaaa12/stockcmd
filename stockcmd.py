@@ -13,13 +13,13 @@ tse_file = 'tse.csv'
 otc_file = 'otc.csv'
 stock_list = 'stock_list.txt'
 
-def search_number (stock_no, filename):
-    ret = 0
+def search_stock (stock_no, filename):
+    ret = False
 
     f = open(filename,'r')
     for row in csv.reader(f):
         if row[0] == str(stock_no):
-            ret = 1
+            ret = True
             break
     f.close()
     return ret
@@ -41,9 +41,9 @@ elif len(argv) > 1:
         i += 1
 
     for x in argv:
-        if search_number(str(x), otc_file) == 1:
+        if search_stock(str(x), otc_file):
             url = url + 'otc_' + str(x) + '.tw|'
-        elif search_number(str(x), tse_file) == 1:
+        elif search_stock(str(x), tse_file):
             url = url + 'tse_' + str(x) + '.tw|'
         else:
             print 'Error: Cannot find stock ' + str(x) + ' name in files'
@@ -57,7 +57,7 @@ result = r.get(url)
 
 # read json data
 json_data = json.loads(result.content)
-print u'股號\t股名\t成交價\t漲跌\t   %\t成交量\t  時間'
+print u'股號\t股名\t成交價\t漲跌\t百分比\t成交量\t資料時間'
 
 for i in range(0, count, 1):
     j = json_data['msgArray'][i]
