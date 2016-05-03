@@ -13,6 +13,19 @@ tse_file = 'tse.csv'
 otc_file = 'otc.csv'
 stock_list = 'stock_list.txt'
 
+def usage():
+    print 'stockcmd - get stock information for TWSE'
+    print ''
+    print 'Usage:'
+    print '    stockcmd.py [Options] [stock numbers]'
+    print ''
+    print 'Options:'
+    print '    -a: list include TSE index and OTC index'
+    print ''
+    print 'Example:'
+    print '    stockcmd.py -a 2330 2317 3008'
+    print ''
+
 def search_stock (stock_no, filename):
     ret = False
 
@@ -26,14 +39,18 @@ def search_stock (stock_no, filename):
 
 
 if len(argv) == 1:
-    url = url + 'tse_t00.tw|otc_o00.tw'
-    count += 2
+    usage()
+    exit()
 
 elif len(argv) > 1:
     del argv[0]
     i = 0
 
     for x in argv:
+        if str(x) == '-h' or str(x) == '--help':
+            usage()
+            exit()
+
         if str(x) == '-a':
             url = url + 'tse_t00.tw|otc_o00.tw|'
             count += 2
@@ -46,7 +63,7 @@ elif len(argv) > 1:
         elif search_stock(str(x), tse_file):
             url = url + 'tse_' + str(x) + '.tw|'
         else:
-            print 'Error: Cannot find stock ' + str(x) + ' name in files'
+            print str(x) + ': wrong parameter'
             continue
         count += 1
 
