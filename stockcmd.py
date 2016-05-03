@@ -28,6 +28,7 @@ def usage():
     print '    stockcmd.py -a 2330 2317 3008'
     print ''
 
+
 def search_stock(stock_no, filename):
     ret = False
 
@@ -39,11 +40,27 @@ def search_stock(stock_no, filename):
     f.close()
     return ret
 
+
 def remove_special_char(string):
     return re.sub(r'[^\x00-\x7F]','', string)
 
+
 def world_index():
-    url = 'http://www.google.com/finance/info?q=INDEXDJX:.DJI,INDEXNASDAQ:.IXIC,INDEXDB:DAX,INDEXNIKKEI:NI225,KRX:KOSPI,SHA:000001,INDEXHANGSENG:HSI,INDEXFTSE:UKX'
+    url = 'http://www.google.com/finance/info?q='
+    list = [['TPE:TAIEX', 'TAIEX'],
+           ['INDEXDJX:.DJI', 'DOW'],
+           ['INDEXNASDAQ:.IXIC', 'NASDAQ'],
+           ['INDEXNASDAQ:SOX', 'PHLX'],
+           ['INDEXDB:DAX', 'DAX'],
+           ['INDEXFTSE:UKX', 'FTSE'],
+           ['INDEXNIKKEI:NI225', 'N225'],
+           ['KRX:KOSPI', 'KOSPI'],
+           ['SHA:000001', 'SHCOMP'],
+           ['INDEXHANGSENG:HSI', 'HK']]
+
+    for index in list:
+        url = url + index[0] + ','
+
     result = requests.get(url)
     json_str = remove_special_char(result.content.replace('// ', '', 1))
 
@@ -51,18 +68,14 @@ def world_index():
     json_data = json.loads(json_str)
 
     print u'指數\t\t點數\t\t漲跌\t\t百分比'
-    for i in range(0, 7, 1):
+    for i in range(0, len(list), 1):
         j = json_data[i]
-        name = j["t"]
+        ratio = j["cp"]
+        if ratio.find('-'):
+            ratio = '+' + ratio
 
-        if name == '.DJI':
-            name = 'DOW'
-        elif name == '.IXIC':
-            name = 'NASDAQ'
-        elif name == '000001':
-            name = 'SHCOMP'
+        print list[i][1] + '\t\t' + '{0:8s}'.format(j["l"]) + '\t' + j["c"] + '\t\t' + ratio + '%'
 
-        print name + '\t\t' + j["l"] + '\t' + j["c"] + '\t\t' + j["cp"] + '%'
 
 if len(argv) == 1:
     usage()
