@@ -71,14 +71,14 @@ def world_index():
     # read json data
     json_data = json.loads(json_str)
 
-    print u'指數\t\t點數\t\t漲跌\t\t百分比'
+    print u'  指數          點數             漲跌         百分比'
     for i in range(0, len(list), 1):
         j = json_data[i]
         ratio = j["cp"]
         if ratio.find('-'):
             ratio = '+' + ratio
 
-        print list[i][1] + '\t\t' + '{0:8s}'.format(j["l"]) + '\t' + j["c"] + '\t\t' + ratio + '%'
+        print ' ' + '{0:13s}'.format(list[i][1]) + '{0:18s}'.format(j["l"]) + '{0:14s}'.format(j["c"]) + ratio + '%'
     print ''
 
 
@@ -87,41 +87,40 @@ if len(argv) == 1:
     usage()
     exit()
 
-elif len(argv) > 1:
-    del argv[0]
-    i = 0
-    add_world = False
-    add_twse = False
+del argv[0]
+i = 0
+add_world = False
+add_twse = False
 
-    # read parameters
-    for x in argv:
-        if str(x) == '-a':
-            add_world = True;
-            add_twse = True;
-        elif str(x) == '-w':
-            add_world = True;
-        elif str(x) == '-i':
-            add_twse = True;
-        elif str(x) == '-h' or str(x) == '--help':
-            usage()
-            exit()
+# read parameters
+for x in argv:
+    if str(x) == '-a':
+        add_world = True;
+        add_twse = True;
+    elif str(x) == '-w':
+        add_world = True;
+    elif str(x) == '-i':
+        add_twse = True;
+    elif str(x) == '-h' or str(x) == '--help':
+        usage()
+        exit()
 
-    if add_world:
-        world_index()
+if add_world:
+    world_index()
 
-    if add_twse:
-        url = url + 'tse_t00.tw|otc_o00.tw|'
-        count += 2
+if add_twse:
+    url = url + 'tse_t00.tw|otc_o00.tw|'
+    count += 2
 
-    # determine stock is in tse or otc and add it to list
-    for x in argv:
-        if search_stock(str(x), otc_file):
-            url = url + 'otc_' + str(x) + '.tw|'
-        elif search_stock(str(x), tse_file):
-            url = url + 'tse_' + str(x) + '.tw|'
-        else:
-            continue
-        count += 1
+# determine stock is in tse or otc and add it to list
+for x in argv:
+    if search_stock(str(x), otc_file):
+        url = url + 'otc_' + str(x) + '.tw|'
+    elif search_stock(str(x), tse_file):
+        url = url + 'tse_' + str(x) + '.tw|'
+    else:
+        continue
+    count += 1
 
 if count > 0:
     # access the index first and then send request for stock list
@@ -131,7 +130,7 @@ if count > 0:
 
     # read json data
     json_data = json.loads(result.content)
-    print u'股號\t股名\t成交價\t漲跌\t百分比\t成交量\t資料時間'
+    print u' 股號    股名    成交價      漲跌     百分比     成交量     資料時間'
 
     for i in range(0, count, 1):
         j = json_data['msgArray'][i]
@@ -154,5 +153,8 @@ if count > 0:
         elif stock_no == 'o00':
             name = u'上櫃'
 
-        print j["c"] + '\t' + name + '\t' + j["z"] + '\t' + change_str + '\t' + change_str_p + '%\t' + j["v"] + '\t' + j["t"]
+        print ' ' + '{0:8s}'.format(j["c"]) \
+                  + name + '    {0:10s}'.format(j["z"]) \
+                  + ' {0:10s}'.format(change_str) +  change_str_p + '%'\
+                  + '    {0:>7s}'.format(j["v"]) + '     ' + j["t"]
     print ''
