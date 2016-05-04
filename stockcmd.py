@@ -92,7 +92,8 @@ def print_result(json_str, stock_type):
     json_data = json.loads(json_str)
 
     if stock_type == 'world':
-        print title_color + u'  指數            點數            漲跌         百分比'
+        print title_color + u'  指數            點數            漲跌          百分比'
+        print '-------------------------------------------------------'
         for i in range(0, len(INDEX_LIST), 1):
             j = json_data[i]
             name = INDEX_LIST[i][1]
@@ -110,7 +111,8 @@ def print_result(json_str, stock_type):
             print item_color + ' ' + '{0:13s}'.format(name) + '{0:>10s}'.format(j["l"]) + '{0:>15s}'.format(j["c"]) + '{0:>14s}%'.format(ratio)
 
     elif stock_type == 'tw':
-        print title_color + u' 股號     股名      成交價       漲跌      百分比     成交量     資料時間'
+        print title_color + u' 股號    股名       成交價       漲跌      百分比     成交量     資料時間'
+        print '--------------------------------------------------------------------------'
 
         for i in range(0, len(json_data['msgArray']), 1):
             j = json_data['msgArray'][i]
@@ -138,7 +140,7 @@ def print_result(json_str, stock_type):
             elif stock_no == 'o00':
                 name = u'上櫃'
 
-            print item_color + ' ' + '{0:8s}'.format(j["c"]) \
+            print item_color + ' ' + '{0:7s}'.format(j["c"]) + ' ' \
                   + name + '\t    {0:7s}'.format(j["z"]) \
                   + '     {0:11s}'.format(change_str) +  change_str_p + '%'\
                   + '    {0:>7s}'.format(j["v"]) + '     ' + j["t"]
