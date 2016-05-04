@@ -21,7 +21,7 @@ INDEX_LIST = [['TPE:TAIEX', 'TAIEX'],
               ['KRX:KOSPI', 'KOSPI'],
               ['SHA:000001', 'SHCOMP'],
               ['INDEXHANGSENG:HSI', 'HK']]
-TW_STOCK_LIST = [2330, 2317, 3008] # you can define the default stock list!!
+TW_STOCK_LIST = ['2330', '2317', '3008', '00631L', '00632R'] # you can define the default stock list!!
 color_print = False
 
 
@@ -111,7 +111,7 @@ def print_result(json_str, stock_type):
             print item_color + ' ' + '{0:13s}'.format(name) + '{0:>10s}'.format(j["l"]) + '{0:>15s}'.format(j["c"]) + '{0:>14s}%'.format(ratio)
 
     elif stock_type == 'tw':
-        print title_color + u' 股號    股名       成交價       漲跌      百分比     成交量     資料時間'
+        print title_color + u' 股號     股名       成交價      漲跌      百分比     成交量     資料時間'
         print '--------------------------------------------------------------------------'
 
         for i in range(0, len(json_data['msgArray']), 1):
@@ -141,7 +141,7 @@ def print_result(json_str, stock_type):
                 name = u'上櫃'
 
             print item_color + ' ' + '{0:7s}'.format(j["c"]) + ' ' \
-                  + name + '\t    {0:7s}'.format(j["z"]) \
+                  + name + '\t    {0:>7s}'.format(j["z"]) \
                   + '     {0:11s}'.format(change_str) +  change_str_p + '%'\
                   + '    {0:>7s}'.format(j["v"]) + '     ' + j["t"]
     print ''
