@@ -22,6 +22,7 @@ INDEX_LIST = [['TPE:TAIEX', 'TAIEX'],
               ['SHA:000001', 'SHCOMP'],
               ['INDEXHANGSENG:HSI', 'HK']]
 TW_STOCK_LIST = [2330, 2317, 3008] # you can define the default stock list!!
+color_print = False
 
 
 def usage():
@@ -35,6 +36,7 @@ def usage():
     print '    -i: list include TSE index and OTC index'
     print '    -w: list International Stock Indexes'
     print '    -q: list the stocks predefined'
+    print '    -c: colorful print result'
     print '    -h: show this page'
     print ''
     print 'Example:'
@@ -73,21 +75,42 @@ def world_index():
 
 
 def print_result(json_str, stock_type):
+    red = '\033[1;31;40m'
+    green = '\033[1;32;40m'
+    yellow = '\033[1;33;40m'
+    title_color = ''
+    item_color = ''
+
+    if color_print == True:
+        title_color = yellow
+    else:
+        red = ''
+        green = ''
+        yellow = ''
+
     # read json data
     json_data = json.loads(json_str)
 
     if stock_type == 'world':
-        print u'  指數            點數             漲跌         百分比'
+        print title_color + u'  指數            點數            漲跌         百分比'
         for i in range(0, len(INDEX_LIST), 1):
             j = json_data[i]
+            name = INDEX_LIST[i][1]
+
             ratio = j["cp"]
             if ratio.find('-'):
                 ratio = '+' + ratio
-            name = INDEX_LIST[i][1]
-            print ' ' + '{0:13s}'.format(name) + '{0:>10s}'.format(j["l"]) + '{0:>15s}'.format(j["c"]) + '{0:>14s}%'.format(ratio)
+                item_color = red
+            else:
+                item_color = green
+
+            if float(j["c"]) == 0:
+                item_color = ''
+
+            print item_color + ' ' + '{0:13s}'.format(name) + '{0:>10s}'.format(j["l"]) + '{0:>15s}'.format(j["c"]) + '{0:>14s}%'.format(ratio)
 
     elif stock_type == 'tw':
-        print u' 股號     股名      成交價       漲跌      百分比     成交量     資料時間'
+        print title_color + u' 股號     股名      成交價       漲跌      百分比     成交量     資料時間'
 
         for i in range(0, len(json_data['msgArray']), 1):
             j = json_data['msgArray'][i]
@@ -95,8 +118,13 @@ def print_result(json_str, stock_type):
 
             if diff > 0:
                 sign = '+'
+                item_color = red
+            elif diff == 0:
+                sign = ''
+                item_color = ''
             else:
                 sign = ''
+                item_color = green
 
             change_str = sign + str(diff)
             change_str_p = sign + '{0:.2f}'.format(diff / float(j["y"]) *100)
@@ -110,10 +138,10 @@ def print_result(json_str, stock_type):
             elif stock_no == 'o00':
                 name = u'上櫃'
 
-            print ' ' + '{0:8s}'.format(j["c"]) \
-                      + name + '\t    {0:7s}'.format(j["z"]) \
-                      + '     {0:11s}'.format(change_str) +  change_str_p + '%'\
-                      + '    {0:>7s}'.format(j["v"]) + '     ' + j["t"]
+            print item_color + ' ' + '{0:8s}'.format(j["c"]) \
+                  + name + '\t    {0:7s}'.format(j["z"]) \
+                  + '     {0:11s}'.format(change_str) +  change_str_p + '%'\
+                  + '    {0:>7s}'.format(j["v"]) + '     ' + j["t"]
     print ''
 
 
@@ -135,7 +163,10 @@ def main():
 
     # read parameters
     for x in argv:
-        if str(x) == '-a':
+        if str(x) == '-c':
+            global color_print
+            color_print = True
+        elif str(x) == '-a':
             add_world = True;
             add_twse = True
             add_stock_list = True
