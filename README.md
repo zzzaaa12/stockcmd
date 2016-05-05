@@ -22,8 +22,8 @@ stockcmd
     -h: 顯示說明頁面
 
 **檔案說明：**  
-    stockcmd.py：主程式  
-    otc.csv & tse.csv：台股上市&上櫃股票清單  
+ - stockcmd.py：主程式  
+ - otc.csv & tse.csv：台股上市&上櫃股票清單  
 
 **使用範例：**  
 
