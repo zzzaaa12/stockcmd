@@ -122,7 +122,7 @@ def print_result(json_str, stock_type):
                 sign = '+'
                 item_color = red
             elif diff == 0:
-                sign = ''
+                sign = ' '
                 item_color = ''
             else:
                 sign = ''
