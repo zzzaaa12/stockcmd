@@ -5,22 +5,23 @@ import csv
 import json
 import requests
 import re
+from datetime import datetime
 
 TWSE_SERVER = '220.229.103.179'
 TWSE_URL = 'http://' + TWSE_SERVER + '/stock/api/getStockInfo.jsp?ex_ch='
 TSE_FILE = 'tse.csv'
 OTC_FILE = 'otc.csv'
 GOOGLE_URL = 'http://www.google.com/finance/info?q='
-INDEX_LIST = [['TPE:TAIEX', 'TAIEX'],
-              ['INDEXDJX:.DJI', 'DOW'],
-              ['INDEXNASDAQ:.IXIC', 'NASDAQ'],
-              ['INDEXNASDAQ:SOX', 'PHLX'],
-              ['INDEXDB:DAX', 'DAX'],
-              ['INDEXFTSE:UKX', 'FTSE'],
-              ['INDEXNIKKEI:NI225', 'N225'],
-              ['KRX:KOSPI', 'KOSPI'],
-              ['SHA:000001', 'SHCOMP'],
-              ['INDEXHANGSENG:HSI', 'HK']]
+INDEX_LIST = [['TPE:TAIEX'        , 'TAIEX' , +8], # format: index name, short name, timezone
+              ['INDEXDJX:.DJI'    , 'DOW'   , -4],
+              ['INDEXNASDAQ:.IXIC', 'NASDAQ', -4],
+              ['INDEXNASDAQ:SOX'  , 'PHLX'  , -4],
+              ['INDEXDB:DAX'      , 'DAX'   , +2],
+              ['INDEXFTSE:UKX'    , 'FTSE'  , +0],
+              ['INDEXNIKKEI:NI225', 'N225'  , +9],
+              ['KRX:KOSPI'        , 'KOSPI' , +9],
+              ['SHA:000001'       , 'SHCOMP', +8],
+              ['INDEXHANGSENG:HSI', 'HK'    , +8]]
 TW_STOCK_LIST = ['2330', '2317', '3008', '00631L', '00632R'] # you can define the default stock list!!
 color_print = False
 
@@ -92,8 +93,8 @@ def print_result(json_str, stock_type):
     json_data = json.loads(json_str)
 
     if stock_type == 'world':
-        print title_color + u'  指數            點數            漲跌          百分比'
-        print '-------------------------------------------------------'
+        print title_color + u'  指數         點數        漲跌      百分比           資料時間'
+        print '-------------------------------------------------------------------'
         for i in range(0, len(INDEX_LIST), 1):
             j = json_data[i]
             name = INDEX_LIST[i][1]
@@ -108,7 +109,15 @@ def print_result(json_str, stock_type):
             if float(j["c"]) == 0:
                 item_color = ''
 
-            print item_color + ' ' + '{0:13s}'.format(name) + '{0:>10s}'.format(j["l"]) + '{0:>15s}'.format(j["c"]) + '{0:>14s}%'.format(ratio)
+            last_time = datetime.strptime(j["lt_dts"], '%Y-%m-%dT%H:%M:%SZ').strftime('%H:%M:%S (%m/%d)')
+            print item_color + ' ' \
+                  + '{0:10s}'.format(name) \
+                  + '{0:>10s}'.format(j["l"]) \
+                  + '{0:>11s}'.format(j["c"]) \
+                  + '{0:>10s}%'.format(ratio) \
+                  + '{0:>23s}'.format(str(last_time))
+
+
 
     elif stock_type == 'tw':
         print title_color + u' 股號     股名       成交價      漲跌      百分比     成交量     資料時間'
@@ -144,6 +153,7 @@ def print_result(json_str, stock_type):
                   + name + '\t    {0:>7s}'.format(j["z"]) \
                   + '     {0:11s}'.format(change_str) +  change_str_p + '%'\
                   + '    {0:>7s}'.format(j["v"]) + '     ' + j["t"]
+
     print ''
 
 
@@ -224,4 +234,6 @@ def main():
         json_str = result.content
         print_result(json_str, 'tw')
 
-main()
+
+if __name__ == '__main__':
+	main()
