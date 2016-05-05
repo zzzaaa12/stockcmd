@@ -6,18 +6,19 @@ import json
 import requests
 import re
 from datetime import datetime
+from datetime import timedelta
 
 TWSE_SERVER = '220.229.103.179'
 TWSE_URL = 'http://' + TWSE_SERVER + '/stock/api/getStockInfo.jsp?ex_ch='
 TSE_FILE = 'tse.csv'
 OTC_FILE = 'otc.csv'
 GOOGLE_URL = 'http://www.google.com/finance/info?q='
-INDEX_LIST = [['TPE:TAIEX'        , 'TAIEX' , +8], # format: index name, short name, timezone
-              ['INDEXDJX:.DJI'    , 'DOW'   , -4],
+INDEX_LIST = [['TPE:TAIEX'        , 'TAIEX' , +8], # Format: index name, short name, timezone
+              ['INDEXDJX:.DJI'    , 'DOW'   , -4], # FIXME: Daylight saving time
               ['INDEXNASDAQ:.IXIC', 'NASDAQ', -4],
               ['INDEXNASDAQ:SOX'  , 'PHLX'  , -4],
               ['INDEXDB:DAX'      , 'DAX'   , +2],
-              ['INDEXFTSE:UKX'    , 'FTSE'  , +0],
+              ['INDEXFTSE:UKX'    , 'FTSE'  , +1],
               ['INDEXNIKKEI:NI225', 'N225'  , +9],
               ['KRX:KOSPI'        , 'KOSPI' , +9],
               ['SHA:000001'       , 'SHCOMP', +8],
@@ -109,19 +110,20 @@ def print_result(json_str, stock_type):
             if float(j["c"]) == 0:
                 item_color = ''
 
-            last_time = datetime.strptime(j["lt_dts"], '%Y-%m-%dT%H:%M:%SZ').strftime('%H:%M:%S (%m/%d)')
+            timezone = int(INDEX_LIST[i][2])
+            last_time = datetime.strptime(j["lt_dts"], '%Y-%m-%dT%H:%M:%SZ') + timedelta(hours = 8-timezone)
+
             print item_color + ' ' \
                   + '{0:10s}'.format(name) \
                   + '{0:>10s}'.format(j["l"]) \
                   + '{0:>11s}'.format(j["c"]) \
                   + '{0:>10s}%'.format(ratio) \
-                  + '{0:>23s}'.format(str(last_time))
-
+                  + '{0:>23s}'.format(str(last_time.strftime('%H:%M:%S (%m/%d)')))
 
 
     elif stock_type == 'tw':
-        print title_color + u' 股號     股名       成交價      漲跌      百分比     成交量     資料時間'
-        print '--------------------------------------------------------------------------'
+        print title_color + u' 股號     股名       成交價      漲跌      百分比     成交量         資料時間'
+        print '----------------------------------------------------------------------------------'
 
         for i in range(0, len(json_data['msgArray']), 1):
             j = json_data['msgArray'][i]
@@ -149,10 +151,12 @@ def print_result(json_str, stock_type):
             elif stock_no == 'o00':
                 name = u'上櫃'
 
+            date = datetime.strptime(j["d"], '%Y%m%d')
+
             print item_color + ' ' + '{0:7s}'.format(j["c"]) + ' ' \
                   + name + '\t    {0:>7s}'.format(j["z"]) \
                   + '     {0:11s}'.format(change_str) +  change_str_p + '%'\
-                  + '    {0:>7s}'.format(j["v"]) + '     ' + j["t"]
+                  + '    {0:>7s}'.format(j["v"]) + '     ' + j["t"] + date.strftime(' (%m/%d)')
 
     print ''
 
