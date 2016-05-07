@@ -8,7 +8,7 @@ import re
 from datetime import datetime
 from datetime import timedelta
 
-TWSE_SERVER = '220.229.103.179'
+TWSE_SERVER = '220.229.103.179' # mis.twse.com.tw
 TWSE_URL = 'http://' + TWSE_SERVER + '/stock/api/getStockInfo.jsp?ex_ch='
 TSE_FILE = 'tse.csv'
 OTC_FILE = 'otc.csv'
@@ -23,8 +23,8 @@ INDEX_LIST = [['TPE:TAIEX'        , 'TAIEX' , +8], # Format: index name, short n
               ['KRX:KOSPI'        , 'KOSPI' , +9],
               ['SHA:000001'       , 'SHCOMP', +8],
               ['INDEXHANGSENG:HSI', 'HK'    , +8]]
-TW_STOCK_LIST = ['2330', '2317', '3008', '00631L', '00632R'] # you can define the default stock list!!
-color_print = False
+USER_STOCK_LIST = ['2330', '2317', '3008', '00631L', '00632R'] # you can define the default stock list!!
+COLOR_OUTPUT = False
 
 
 def usage():
@@ -51,7 +51,6 @@ def usage():
 
 def search_stock(stock_no, filename):
     ret = False
-
     f = open(filename,'r')
     for row in csv.reader(f):
         if row[0] == str(stock_no):
@@ -61,10 +60,12 @@ def search_stock(stock_no, filename):
     return ret
 
 
+# for output of google finance
 def remove_special_char(string):
     return re.sub(r'[^\x00-\x7F]','', string)
 
 
+# show world index from google finance
 def world_index():
     url = [GOOGLE_URL]
     for item in INDEX_LIST:
@@ -76,19 +77,18 @@ def world_index():
     print_result(json_str, 'world')
 
 
+# print final stock information
 def print_result(json_str, stock_type):
     red = '\033[1;31;40m'
     green = '\033[1;32;40m'
     yellow = '\033[1;33;40m'
-    title_color = ''
+    title_color = yellow
     item_color = ''
 
-    if color_print == True:
-        title_color = yellow
-    else:
+    if COLOR_OUTPUT == False:
         red = ''
         green = ''
-        yellow = ''
+        title_color = ''
 
     # read json data
     json_data = json.loads(json_str)
@@ -119,7 +119,6 @@ def print_result(json_str, stock_type):
                   + '{0:>11s}'.format(j["c"]) \
                   + '{0:>10s}%'.format(ratio) \
                   + '{0:>23s}'.format(str(last_time.strftime('%H:%M:%S (%m/%d)')))
-
 
     elif stock_type == 'tw':
         print title_color + u' 股號     股名       成交價      漲跌      百分比     成交量         資料時間'
@@ -164,13 +163,13 @@ def print_result(json_str, stock_type):
 def main():
     argv = sys.argv
     count = 0
-    add_world = False
-    add_twse = False
+    show_world_index = False
+    show_tw_index = False
     add_stock_list = False
     url = [TWSE_URL]
 
+    # no parameter, show usage()
     if len(argv) == 1:
-        # no parameter, show usage()
         usage()
         exit()
 
@@ -180,39 +179,39 @@ def main():
     # read parameters
     for x in argv:
         if str(x) == '-c':
-            global color_print
-            color_print = True
+            global COLOR_OUTPUT
+            COLOR_OUTPUT = True
         elif str(x) == '-a':
-            add_world = True;
-            add_twse = True
+            show_world_index = True;
+            show_tw_index = True
             add_stock_list = True
         elif str(x) == '-w':
-            add_world = True
+            show_world_index = True
         elif str(x) == '-i':
-            add_twse = True
+            show_tw_index = True
         elif str(x) == '-q':
             add_stock_list = True
         elif str(x) == '-h':
             usage()
             exit()
 
-    if add_world:
+    # get world index information from google finance
+    if show_world_index:
         world_index()
 
-    if add_twse:
+    # add twse and otc index
+    if show_tw_index:
         url.append('tse_t00.tw|')
         url.append('otc_o00.tw|')
 
     # add user predefined stock list
     # search_stock() is use to determine stock is in tse or otc
     if add_stock_list:
-        for x in TW_STOCK_LIST:
+        for x in USER_STOCK_LIST:
             if search_stock(str(x), OTC_FILE):
                 url.append('otc_' + str(x) + '.tw|')
             elif search_stock(str(x), TSE_FILE):
                 url.append('tse_' + str(x) + '.tw|')
-            else:
-                continue
 
     # search stock number from input
     for x in argv:
@@ -220,19 +219,17 @@ def main():
             url.append('otc_' + str(x) + '.tw|')
         elif search_stock(str(x), TSE_FILE):
             url.append('tse_' + str(x) + '.tw|')
-        else:
-            continue
 
-    if len(url) == 1 and add_world == False and add_twse == False and add_stock_list == False:
+    # if no stock nomber or option
+    if len(url) == 1 and show_world_index == False and show_tw_index == False and add_stock_list == False:
         usage()
         exit()
 
     elif len(url) > 1:
-        # access the index first and then send request for stock list
+        # we need access the index before send request for stock list
         r = requests.session()
-        r.get('http://' + TWSE_SERVER + '/stock/index.jsp', headers = {'Accept-Language':'zh-TW'}, timeout=2)
+        r.get('http://' + TWSE_SERVER + '/stock/index.jsp')
         result = r.get(''.join(url))
-
         json_str = result.content
         print_result(json_str, 'tw')
 
