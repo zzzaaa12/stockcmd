@@ -66,11 +66,11 @@ def remove_special_char(string):
 
 
 def world_index():
-    url = GOOGLE_URL
+    url = [GOOGLE_URL]
     for item in INDEX_LIST:
-        url = url + item[0] + ','
+        url.append(item[0] + ',')
 
-    result = requests.get(url)
+    result = requests.get(''.join(url))
     json_str = remove_special_char(result.content.replace('// ', '', 1))
 
     print_result(json_str, 'world')
@@ -167,7 +167,7 @@ def main():
     add_world = False
     add_twse = False
     add_stock_list = False
-    url = TWSE_URL
+    url = [TWSE_URL]
 
     if len(argv) == 1:
         # no parameter, show usage()
@@ -200,40 +200,38 @@ def main():
         world_index()
 
     if add_twse:
-        url = url + 'tse_t00.tw|otc_o00.tw|'
-        count += 2
+        url.append('tse_t00.tw|')
+        url.append('otc_o00.tw|')
 
     # add user predefined stock list
     # search_stock() is use to determine stock is in tse or otc
     if add_stock_list:
         for x in TW_STOCK_LIST:
             if search_stock(str(x), OTC_FILE):
-                url = url + 'otc_' + str(x) + '.tw|'
+                url.append('otc_' + str(x) + '.tw|')
             elif search_stock(str(x), TSE_FILE):
-                url = url + 'tse_' + str(x) + '.tw|'
+                url.append('tse_' + str(x) + '.tw|')
             else:
                 continue
-            count += 1
 
     # search stock number from input
     for x in argv:
         if search_stock(str(x), OTC_FILE):
-            url = url + 'otc_' + str(x) + '.tw|'
+            url.append('otc_' + str(x) + '.tw|')
         elif search_stock(str(x), TSE_FILE):
-            url = url + 'tse_' + str(x) + '.tw|'
+            url.append('tse_' + str(x) + '.tw|')
         else:
             continue
-        count += 1
 
-    if count == 0 and add_world == False and add_twse == False and add_stock_list == False:
+    if len(url) == 1 and add_world == False and add_twse == False and add_stock_list == False:
         usage()
         exit()
 
-    elif count > 0:
+    elif len(url) > 1:
         # access the index first and then send request for stock list
         r = requests.session()
         r.get('http://' + TWSE_SERVER + '/stock/index.jsp', headers = {'Accept-Language':'zh-TW'}, timeout=2)
-        result = r.get(url)
+        result = r.get(''.join(url))
 
         json_str = result.content
         print_result(json_str, 'tw')
