@@ -8,6 +8,8 @@ import re
 from datetime import datetime
 from datetime import timedelta
 
+# you can define the default stock list!!
+TW_STOCK_LIST = ['2330', '2317', '3008', '00631L', '00632R']
 TWSE_SERVER = '220.229.103.179'
 TWSE_URL = 'http://' + TWSE_SERVER + '/stock/api/getStockInfo.jsp?ex_ch='
 TSE_FILE = 'tse.csv'
@@ -23,11 +25,17 @@ INDEX_LIST = [['TPE:TAIEX'        , 'TAIEX' , +8], # Format: index name, id, tim
               ['KRX:KOSPI'        , 'KOSPI' , +9],
               ['SHA:000001'       , 'SHCOMP', +8],
               ['INDEXHANGSENG:HSI', 'HK'    , +8]]
-TW_STOCK_LIST = ['2330', '2317', '3008', '00631L', '00632R'] # you can define the default stock list!!
-color_print = False
 
 # ALL_RESULT includes all result data we need: [id, name, price, changes, percent, volume, time, type]
 ALL_RESULT  = []
+
+# color setting
+color_print = False
+RED = '\033[1;31;40m'
+GREEN = '\033[1;32;40m'
+YELLOW = '\033[1;33;40m'
+WHITE = '\033[1;37;40m'
+
 
 def usage():
     print 'stockcmd - get stock information for TWSE'
@@ -80,38 +88,30 @@ def get_tw_stock_info(url):
 
 def print_result():
     for i in range(len(ALL_RESULT)):
+        type = ALL_RESULT[i][7]
+        last_type = ALL_RESULT[i-1][7]
 
-        red = '\033[1;31;40m'
-        green = '\033[1;32;40m'
-        yellow = '\033[1;33;40m'
-        white = '\033[1;37;40m'
         title_color = ''
         item_color = ''
 
         if color_print == True:
-            title_color = yellow
-        else:
-            red = ''
-            green = ''
-            yellow = ''
+            title_color = YELLOW
+            change = ALL_RESULT[i][3]
 
-        type = ALL_RESULT[i][7]
-        change = ALL_RESULT[i][3]
+            if float(change) > 0:
+                item_color = RED
+            elif float(change) < 0:
+                item_color = GREEN
+            else:
+                item_color = WHITE
 
-        if float(change) > 0:
-            item_color = red
-        elif float(change) < 0:
-            item_color = green
-        else:
-            item_color = white
-
-        if (i == 0) or (type == 'stock' and ALL_RESULT[i-1][7] != 'stock'):
+        if (i == 0) or (type == 'stock' and last_type != 'stock'):
             if i > 0:
                 print ''
-            print title_color + ' 股號     股名       成交價      漲跌      百分比     成交量         資料時間'
+            print title_color + ' 股號     股名       成交價       漲跌      百分比     成交量         資料時間'
             print '----------------------------------------------------------------------------------'
 
-        # for tw stock
+        # print all data
         print item_color + ' ' + \
               '{0:s}'.format(ALL_RESULT[i][0]) + '\t ' + \
               ALL_RESULT[i][1] + '\t' + \
@@ -125,19 +125,6 @@ def print_result():
 
 def add_result_to_list(json_str, stock_type):
 
-    if color_print == True:
-        red = '\033[1;31;40m'
-        green = '\033[1;32;40m'
-        yellow = '\033[1;33;40m'
-        white = '\033[1;37;40m'
-        title_color = yellow
-    else:
-        red = ''
-        green = ''
-        yellow = ''
-        white = ''
-        title_color = ''
-
     # read json data
     json_data = json.loads(json_str)
 
@@ -150,18 +137,12 @@ def add_result_to_list(json_str, stock_type):
             ratio = j["cp"]
             if ratio.find('-'):
                 ratio = '+' + ratio
-                item_color = red
-            else:
-                item_color = green
-
-            if float(j["c"]) == 0:
-                item_color = white
 
             timezone = int(INDEX_LIST[i][2])
             last_time = datetime.strptime(j["lt_dts"], '%Y-%m-%dT%H:%M:%SZ') + timedelta(hours = 8-timezone)
             time_str = str(last_time.strftime('%H:%M:%S (%m/%d)'))
 
-            result.append(id)
+            result.append(' ')
             result.append(id)
             result.append(j["l"])
             result.append(j["c"])
@@ -179,13 +160,10 @@ def add_result_to_list(json_str, stock_type):
 
             if diff > 0:
                 sign = '+'
-                item_color = red
             elif diff < 0:
                 sign = ''
-                item_color = green
             else:
                 sign = ' '
-                item_color = white
 
             change_str = sign + str(diff)
             change_str_p = sign + '{0:.2f}'.format(diff / float(j["y"]) *100)
