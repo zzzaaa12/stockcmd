@@ -75,17 +75,6 @@ def remove_special_char(string):
     return re.sub(r'[^\x00-\x7F]','', string)
 
 
-def get_tw_stock_info(url):
-    # query taiwan stock:
-    #   access the index first and then send request for stock list
-    r = requests.session()
-    r.get('http://' + TWSE_SERVER + '/stock/index.jsp', headers = {'Accept-Language':'zh-TW'}, timeout=2)
-    result = r.get(url)
-
-    json_str = result.content
-    add_result_to_list(json_str, 'tw')
-
-
 def print_result():
     for i in range(len(ALL_RESULT)):
         type = ALL_RESULT[i][7]
@@ -97,12 +86,12 @@ def print_result():
 
         if color_print == True:
             title_color = YELLOW
+            color_end = COLOR_END
             change = ALL_RESULT[i][3]
             if float(change) > 0:
                 item_color = RED
             elif float(change) < 0:
                 item_color = GREEN
-            color_end = COLOR_END
 
         if (i == 0) or (type == 'stock' and last_type != 'stock'):
             if i > 0:
@@ -123,12 +112,11 @@ def print_result():
 
 
 def add_result_to_list(json_str, stock_type):
-
     # read json data
     json_data = json.loads(json_str)
 
     if stock_type == 'world':
-        for i in range(0, len(INDEX_LIST), 1):
+        for i in range(len(INDEX_LIST)):
             result = []
             j = json_data[i]
             id = INDEX_LIST[i][1]
@@ -152,7 +140,7 @@ def add_result_to_list(json_str, stock_type):
             ALL_RESULT.append(result)
 
     elif stock_type == 'tw':
-        for i in range(0, len(json_data['msgArray']), 1):
+        for i in range(len(json_data['msgArray'])):
             result = []
             j = json_data['msgArray'][i]
             diff = float(j["z"]) - float(j["y"])
@@ -190,21 +178,19 @@ def add_result_to_list(json_str, stock_type):
             ALL_RESULT.append(result)
 
 
-def get_tw_stock_url(add_twse, add_stock_list, argv):
-
+def create_tw_stock_url(add_twse, add_stock_list, argv):
     url = TWSE_URL
-
     if add_twse:
         url = url + 'tse_t00.tw|otc_o00.tw|'
 
     # add user predefined stock list
     # search_stock() is use to determine stock is in tse or otc
     if add_stock_list:
-        for x in TW_STOCK_LIST:
-            if search_stock(str(x), OTC_FILE):
-                url = url + 'otc_' + str(x) + '.tw|'
-            elif search_stock(str(x), TSE_FILE):
-                url = url + 'tse_' + str(x) + '.tw|'
+        for i in TW_STOCK_LIST:
+            if search_stock(str(i), OTC_FILE):
+                url = url + 'otc_' + str(i) + '.tw|'
+            elif search_stock(str(i), TSE_FILE):
+                url = url + 'tse_' + str(i) + '.tw|'
 
     # search stock number from input
     for i in argv:
@@ -216,6 +202,7 @@ def get_tw_stock_url(add_twse, add_stock_list, argv):
     return url;
 
 
+# query world index:
 def get_world_index_info():
     url = GOOGLE_URL
     for item in INDEX_LIST:
@@ -224,6 +211,17 @@ def get_world_index_info():
     result = requests.get(url)
     json_str = remove_special_char(result.content.replace('// ', '', 1))
     add_result_to_list(json_str, 'world')
+
+
+# query taiwan stock:
+def get_tw_stock_info(url):
+    #   access the index first and then send request for stock list
+    r = requests.session()
+    r.get('http://' + TWSE_SERVER + '/stock/index.jsp', headers = {'Accept-Language':'zh-TW'}, timeout=2)
+    result = r.get(url)
+
+    json_str = result.content
+    add_result_to_list(json_str, 'tw')
 
 
 def main():
@@ -260,18 +258,21 @@ def main():
             usage()
             exit()
 
-    if add_world:
-        get_world_index_info()
+    # generate query url
+    tw_url = create_tw_stock_url(add_twse, add_stock_list, argv)
 
-    url = get_tw_stock_url(add_twse, add_stock_list, argv)
-
-    if url == TWSE_URL and add_world == False:
-        # there is no index or stock
+    # show usage() if there is no index or stock
+    if tw_url == TWSE_URL and add_world == False:
         usage()
         exit()
 
-    elif url != TWSE_URL:
-        get_tw_stock_info(url)
+    # access google finance for world index
+    if add_world:
+        get_world_index_info()
+
+    # access twse server for taiwan stock
+    if tw_url != TWSE_URL:
+        get_tw_stock_info(tw_url)
 
     print_result();
 
