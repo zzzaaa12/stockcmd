@@ -26,7 +26,7 @@ INDEX_LIST = [['TPE:TAIEX'        , 'TAIEX' , +8], # Format: index name, id, tim
 TW_STOCK_LIST = ['2330', '2317', '3008', '00631L', '00632R'] # you can define the default stock list!!
 color_print = False
 
-# [id, name, price, changes, percent, volume, time, type]
+# ALL_RESULT includes all result data we need: [id, name, price, changes, percent, volume, time, type]
 ALL_RESULT  = []
 
 def usage():
@@ -67,32 +67,76 @@ def remove_special_char(string):
     return re.sub(r'[^\x00-\x7F]','', string)
 
 
-def world_index():
-    url = GOOGLE_URL
-    for item in INDEX_LIST:
-        url = url + item[0] + ','
+def get_tw_stock_info(url):
+    # query taiwan stock:
+    #   access the index first and then send request for stock list
+    r = requests.session()
+    r.get('http://' + TWSE_SERVER + '/stock/index.jsp', headers = {'Accept-Language':'zh-TW'}, timeout=2)
+    result = r.get(url)
 
-    result = requests.get(url)
-    json_str = remove_special_char(result.content.replace('// ', '', 1))
-
-    print_result(json_str, 'world')
+    json_str = result.content
+    add_result_to_list(json_str, 'tw')
 
 
-def print_result(json_str, stock_type):
-    red = '\033[1;31;40m'
-    green = '\033[1;32;40m'
-    yellow = '\033[1;33;40m'
-    white = '\033[1;37;40m'
-    title_color = ''
-    item_color = ''
+def print_result():
+    for i in range(len(ALL_RESULT)):
+
+        red = '\033[1;31;40m'
+        green = '\033[1;32;40m'
+        yellow = '\033[1;33;40m'
+        white = '\033[1;37;40m'
+        title_color = ''
+        item_color = ''
+
+        if color_print == True:
+            title_color = yellow
+        else:
+            red = ''
+            green = ''
+            yellow = ''
+
+        type = ALL_RESULT[i][7]
+        change = ALL_RESULT[i][3]
+
+        if float(change) > 0:
+            item_color = red
+        elif float(change) < 0:
+            item_color = green
+        else:
+            item_color = white
+
+        if (i == 0) or (type == 'stock' and ALL_RESULT[i-1][7] != 'stock'):
+            if i > 0:
+                print ''
+            print title_color + ' 股號     股名       成交價      漲跌      百分比     成交量         資料時間'
+            print '----------------------------------------------------------------------------------'
+
+        # for tw stock
+        print item_color + ' ' + \
+              '{0:s}'.format(ALL_RESULT[i][0]) + '\t ' + \
+              ALL_RESULT[i][1] + '\t' + \
+              '{0:>12s}'.format(ALL_RESULT[i][2]) + ' ' + \
+              '{0:>10s}'.format(ALL_RESULT[i][3]) + ' ' + \
+              '{0:>9s}%'.format(ALL_RESULT[i][4]) + ' ' + \
+              '{0:>9s}'.format(ALL_RESULT[i][5]) + ' ' + \
+              '{0:>21s}'.format(ALL_RESULT[i][6])
+    print ''
+
+
+def add_result_to_list(json_str, stock_type):
 
     if color_print == True:
+        red = '\033[1;31;40m'
+        green = '\033[1;32;40m'
+        yellow = '\033[1;33;40m'
+        white = '\033[1;37;40m'
         title_color = yellow
     else:
         red = ''
         green = ''
         yellow = ''
         white = ''
+        title_color = ''
 
     # read json data
     json_data = json.loads(json_str)
@@ -128,7 +172,6 @@ def print_result(json_str, stock_type):
             ALL_RESULT.append(result)
 
     elif stock_type == 'tw':
-
         for i in range(0, len(json_data['msgArray']), 1):
             result = []
             j = json_data['msgArray'][i]
@@ -170,13 +213,48 @@ def print_result(json_str, stock_type):
             ALL_RESULT.append(result)
 
 
+def get_tw_stock_url(add_twse, add_stock_list, argv):
+
+    url = TWSE_URL
+
+    if add_twse:
+        url = url + 'tse_t00.tw|otc_o00.tw|'
+
+    # add user predefined stock list
+    # search_stock() is use to determine stock is in tse or otc
+    if add_stock_list:
+        for x in TW_STOCK_LIST:
+            if search_stock(str(x), OTC_FILE):
+                url = url + 'otc_' + str(x) + '.tw|'
+            elif search_stock(str(x), TSE_FILE):
+                url = url + 'tse_' + str(x) + '.tw|'
+
+    # search stock number from input
+    for i in argv:
+        if search_stock(str(i), OTC_FILE):
+            url = url + 'otc_' + str(i) + '.tw|'
+        elif search_stock(str(i), TSE_FILE):
+            url = url + 'tse_' + str(i) + '.tw|'
+
+    return url;
+
+
+def get_world_index_info():
+    url = GOOGLE_URL
+    for item in INDEX_LIST:
+        url = url + item[0] + ','
+
+    result = requests.get(url)
+    json_str = remove_special_char(result.content.replace('// ', '', 1))
+    add_result_to_list(json_str, 'world')
+
+
 def main():
     argv = sys.argv
     count = 0
     add_world = False
     add_twse = False
     add_stock_list = False
-    url = TWSE_URL
 
     if len(argv) == 1:
         # no parameter, show usage()
@@ -206,87 +284,21 @@ def main():
             exit()
 
     if add_world:
-        world_index()
+        get_world_index_info()
 
-    if add_twse:
-        url = url + 'tse_t00.tw|otc_o00.tw|'
-        count += 2
+    url = get_tw_stock_url(add_twse, add_stock_list, argv)
 
-    # add user predefined stock list
-    # search_stock() is use to determine stock is in tse or otc
-    if add_stock_list:
-        for x in TW_STOCK_LIST:
-            if search_stock(str(x), OTC_FILE):
-                url = url + 'otc_' + str(x) + '.tw|'
-            elif search_stock(str(x), TSE_FILE):
-                url = url + 'tse_' + str(x) + '.tw|'
-            else:
-                continue
-            count += 1
-
-    # search stock number from input
-    for x in argv:
-        if search_stock(str(x), OTC_FILE):
-            url = url + 'otc_' + str(x) + '.tw|'
-        elif search_stock(str(x), TSE_FILE):
-            url = url + 'tse_' + str(x) + '.tw|'
-        else:
-            continue
-        count += 1
-
-    if count == 0 and add_world == False and add_twse == False and add_stock_list == False:
+    if url == TWSE_URL and add_world == False:
+        # there is no index or stock
         usage()
         exit()
 
-    elif count > 0:
-        # access the index first and then send request for stock list
-        r = requests.session()
-        r.get('http://' + TWSE_SERVER + '/stock/index.jsp', headers = {'Accept-Language':'zh-TW'}, timeout=2)
-        result = r.get(url)
+    elif url != TWSE_URL:
+        get_tw_stock_info(url)
 
-        json_str = result.content
-        print_result(json_str, 'tw')
+    print_result();
 
 
 if __name__ == '__main__':
 	main()
 
-for i in range(len(ALL_RESULT)):
-
-    red = '\033[1;31;40m'
-    green = '\033[1;32;40m'
-    yellow = '\033[1;33;40m'
-    title_color = ''
-    item_color = ''
-
-    if color_print == True:
-        title_color = yellow
-    else:
-        red = ''
-        green = ''
-        yellow = ''
-
-    type = ALL_RESULT[i][7]
-    change = ALL_RESULT[i][3]
-
-    if float(change) > 0:
-        item_color = red
-    elif float(change) < 0:
-        item_color = green
-
-    if (i == 0) or (type == 'stock' and ALL_RESULT[i-1][7] != 'stock'):
-        if i > 0:
-            print ''
-        print title_color + ' 股號     股名       成交價      漲跌      百分比     成交量         資料時間'
-        print '----------------------------------------------------------------------------------'
-
-    # for tw stock
-    print item_color + ' ' + \
-          '{0:s}'.format(ALL_RESULT[i][0]) + '\t ' + \
-          ALL_RESULT[i][1] + '\t' + \
-          '{0:>12s}'.format(ALL_RESULT[i][2]) + ' ' + \
-          '{0:>10s}'.format(ALL_RESULT[i][3]) + ' ' + \
-          '{0:>9s}%'.format(ALL_RESULT[i][4]) + ' ' + \
-          '{0:>9s}'.format(ALL_RESULT[i][5]) + ' ' + \
-          '{0:>21s}'.format(ALL_RESULT[i][6])
-print ''
