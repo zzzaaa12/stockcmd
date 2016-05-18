@@ -34,7 +34,7 @@ color_print = False
 RED = '\033[1;31;40m'
 GREEN = '\033[1;32;40m'
 YELLOW = '\033[1;33;40m'
-WHITE = '\033[1;37;40m'
+COLOR_END = '\033[0m'
 
 
 def usage():
@@ -93,22 +93,21 @@ def print_result():
 
         title_color = ''
         item_color = ''
+        color_end = ''
 
         if color_print == True:
             title_color = YELLOW
             change = ALL_RESULT[i][3]
-
             if float(change) > 0:
                 item_color = RED
             elif float(change) < 0:
                 item_color = GREEN
-            else:
-                item_color = WHITE
+            color_end = COLOR_END
 
         if (i == 0) or (type == 'stock' and last_type != 'stock'):
             if i > 0:
                 print ''
-            print title_color + ' 股號     股名       成交價       漲跌      百分比     成交量         資料時間'
+            print title_color + ' 股號     股名       成交價       漲跌      百分比     成交量         資料時間' + color_end
             print '----------------------------------------------------------------------------------'
 
         # print all data
@@ -119,7 +118,7 @@ def print_result():
               '{0:>10s}'.format(ALL_RESULT[i][3]) + ' ' + \
               '{0:>9s}%'.format(ALL_RESULT[i][4]) + ' ' + \
               '{0:>9s}'.format(ALL_RESULT[i][5]) + ' ' + \
-              '{0:>21s}'.format(ALL_RESULT[i][6])
+              '{0:>21s}'.format(ALL_RESULT[i][6]) + color_end
     print ''
 
 
