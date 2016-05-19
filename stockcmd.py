@@ -93,21 +93,35 @@ def print_result():
             elif float(change) < 0:
                 item_color = GREEN
 
-        if (i == 0) or (type == 'stock' and last_type != 'stock'):
-            if i > 0:
-                print ''
-            print title_color + ' 股號     股名       成交價       漲跌      百分比     成交量         資料時間' + color_end
-            print '----------------------------------------------------------------------------------'
+        if type == 'index':
+            if i == 0:
+                print title_color + '          指數        點數        漲跌      百分比                    資料時間' + color_end
+                print '-----------------------------------------------------------------------------------'
 
-        # print all data
-        print item_color + ' ' + \
-              '{0:s}'.format(ALL_RESULT[i][0]) + '\t ' + \
-              ALL_RESULT[i][1] + '\t' + \
-              '{0:>12s}'.format(ALL_RESULT[i][2]) + ' ' + \
-              '{0:>10s}'.format(ALL_RESULT[i][3]) + ' ' + \
-              '{0:>9s}%'.format(ALL_RESULT[i][4]) + ' ' + \
-              '{0:>9s}'.format(ALL_RESULT[i][5]) + ' ' + \
-              '{0:>21s}'.format(ALL_RESULT[i][6]) + color_end
+            # print all data
+            print item_color + '         ' + \
+                  '{0:7s}'.format(ALL_RESULT[i][1]) + \
+                  '{0:>12s}'.format(ALL_RESULT[i][2]) + ' ' + \
+                  '{0:>10s}'.format(ALL_RESULT[i][3]) + ' ' + \
+                  '{0:>9s}%'.format(ALL_RESULT[i][4]) + ' ' + \
+                  '{0:>31s}'.format(ALL_RESULT[i][6]) + color_end
+
+        elif type == 'stock':
+            if (i == 0 or last_type != 'stock'):
+                if i > 0:
+                    print ''
+                print title_color + ' 股號     股名       成交價       漲跌      百分比     成交量         資料時間' + color_end
+                print '-----------------------------------------------------------------------------------'
+
+            # print all data
+            print item_color + ' ' + \
+                  '{0:s}'.format(ALL_RESULT[i][0]) + '\t ' + \
+                  ALL_RESULT[i][1] + '\t' + \
+                  '{0:>12s}'.format(ALL_RESULT[i][2]) + ' ' + \
+                  '{0:>10s}'.format(ALL_RESULT[i][3]) + ' ' + \
+                  '{0:>9s}%'.format(ALL_RESULT[i][4]) + ' ' + \
+                  '{0:>9s}'.format(ALL_RESULT[i][5]) + ' ' + \
+                  '{0:>21s}'.format(ALL_RESULT[i][6]) + color_end
     print ''
 
 
