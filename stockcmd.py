@@ -15,16 +15,16 @@ TWSE_URL = 'http://' + TWSE_SERVER + '/stock/api/getStockInfo.jsp?ex_ch='
 TSE_FILE = 'tse.csv'
 OTC_FILE = 'otc.csv'
 GOOGLE_URL = 'http://www.google.com/finance/info?q='
-INDEX_LIST = [['TPE:TAIEX'        , 'TAIEX' , +8], # Format: index name, id, timezone
-              ['INDEXDJX:.DJI'    , 'DOW'   , -4], # FIXME: Daylight saving time
-              ['INDEXNASDAQ:.IXIC', 'NASDAQ', -4],
-              ['INDEXNASDAQ:SOX'  , 'PHLX'  , -4],
-              ['INDEXDB:DAX'      , 'DAX'   , +2],
-              ['INDEXFTSE:UKX'    , 'FTSE'  , +1],
-              ['INDEXNIKKEI:NI225', 'N225'  , +9],
-              ['KRX:KOSPI'        , 'KOSPI' , +9],
-              ['SHA:000001'       , 'SHCOMP', +8],
-              ['INDEXHANGSENG:HSI', 'HK'    , +8]]
+INDEX_LIST = [['TPE:TAIEX'        , 'TAIEX' , +8, '加權指數'], # Format: google finance id, nickname, timezone, name
+              ['INDEXDJX:.DJI'    , 'DOW'   , -4, '道瓊指數'], # FIXME: Daylight saving time
+              ['INDEXNASDAQ:.IXIC', 'NASDAQ', -4, '那斯達克'],
+              ['INDEXNASDAQ:SOX'  , 'PHLX'  , -4, '費半PHLX'],
+              ['INDEXDB:DAX'      , 'DAX'   , +2, '德國DAX'],
+              ['INDEXFTSE:UKX'    , 'FTSE'  , +1, '英國FTSE'],
+              ['INDEXNIKKEI:NI225', 'N225'  , +9, '日本指數'],
+              ['KRX:KOSPI'        , 'KOSPI' , +9, '韓國指數'],
+              ['SHA:000001'       , 'SHCOMP', +8, '上證指數'],
+              ['INDEXHANGSENG:HSI', 'HK'    , +8, '香港恆生']]
 
 # ALL_RESULT includes all result data we need: [id, name, price, changes, percent, volume, time, type]
 ALL_RESULT  = []
@@ -95,16 +95,17 @@ def print_result():
 
         if type == 'index':
             if i == 0:
-                print title_color + '          指數        點數        漲跌      百分比                    資料時間' + color_end
-                print '-----------------------------------------------------------------------------------'
+                print title_color + ' 代號      指數          點數        漲跌      百分比                 資料時間' + color_end
+                print '---------------------------------------------------------------------------------'
 
             # print all data
-            print item_color + '         ' + \
-                  '{0:7s}'.format(ALL_RESULT[i][1]) + \
-                  '{0:>12s}'.format(ALL_RESULT[i][2]) + ' ' + \
+            print item_color + ' ' + \
+                  '{0:8s}'.format(ALL_RESULT[i][0]) + \
+                  '{0:<10s}'.format(ALL_RESULT[i][1]) + \
+                  '{0:>14s}'.format(ALL_RESULT[i][2]) + ' ' + \
                   '{0:>10s}'.format(ALL_RESULT[i][3]) + ' ' + \
                   '{0:>9s}%'.format(ALL_RESULT[i][4]) + ' ' + \
-                  '{0:>31s}'.format(ALL_RESULT[i][6]) + color_end
+                  '{0:>28s}'.format(ALL_RESULT[i][6]) + color_end
 
         elif type == 'stock':
             if (i == 0 or last_type != 'stock'):
@@ -143,8 +144,8 @@ def add_result_to_list(json_str, stock_type):
             last_time = datetime.strptime(j["lt_dts"], '%Y-%m-%dT%H:%M:%SZ') + timedelta(hours = 8-timezone)
             time_str = str(last_time.strftime('%H:%M:%S (%m/%d)'))
 
-            result.append(' ')
             result.append(id)
+            result.append(INDEX_LIST[i][3])
             result.append(j["l"])
             result.append(j["c"])
             result.append(j["cp"])
