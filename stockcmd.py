@@ -8,12 +8,14 @@ import re
 from datetime import datetime
 from datetime import timedelta
 
-# you can define the default stock list!!
+# User Setting: stock list and file path
 TW_STOCK_LIST = ['2330', '2317', '3008', '00631L', '00632R']
-TWSE_SERVER = '220.229.103.179'
-TWSE_URL = 'http://' + TWSE_SERVER + '/stock/api/getStockInfo.jsp?ex_ch='
 TSE_FILE = 'tse.csv'
 OTC_FILE = 'otc.csv'
+
+# Server Setting
+TWSE_SERVER = '220.229.103.179'
+TWSE_URL = 'http://' + TWSE_SERVER + '/stock/api/getStockInfo.jsp?ex_ch='
 GOOGLE_URL = 'http://www.google.com/finance/info?q='
 INDEX_LIST = [['TPE:TAIEX'        , 'TAIEX' , +8, '加權指數'], # Format: google finance id, nickname, timezone, name
               ['INDEXDJX:.DJI'    , 'DOW'   , -4, '道瓊指數'], # FIXME: Daylight saving time
@@ -27,9 +29,10 @@ INDEX_LIST = [['TPE:TAIEX'        , 'TAIEX' , +8, '加權指數'], # Format: goo
               ['INDEXHANGSENG:HSI', 'HK'    , +8, '香港恆生']]
 
 # ALL_RESULT includes all result data we need: [id, name, price, changes, percent, volume, time, type]
+#   ex: ['00632R', 'T50反1', '19.75', '-0.15', '-0.75%', '88403', '13:30:00 (05/20)']
 ALL_RESULT  = []
 
-# color setting
+# Color Setting
 color_print = False
 RED = '\033[1;31;40m'
 GREEN = '\033[1;32;40m'
