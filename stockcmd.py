@@ -5,6 +5,7 @@ import csv
 import json
 import requests
 import re
+import time
 from datetime import datetime
 from datetime import timedelta
 
@@ -141,6 +142,7 @@ def print_result(show_simple):
 def add_result_to_list(json_str, stock_type):
     # read json data
     json_data = json.loads(json_str)
+    now = time.localtime()
 
     if stock_type == 'world':
         for i in range(len(INDEX_LIST)):
@@ -154,7 +156,10 @@ def add_result_to_list(json_str, stock_type):
 
             timezone = int(INDEX_LIST[i][2])
             last_time = datetime.strptime(j["lt_dts"], '%Y-%m-%dT%H:%M:%SZ') + timedelta(hours = 8-timezone)
-            time_str = str(last_time.strftime('%H:%M:%S (%m/%d)'))
+            if now.tm_mon == last_time.month and now.tm_mday == last_time.day:
+                time_str = str(last_time.strftime('%H:%M:%S (today)'))
+            else:
+                time_str = str(last_time.strftime('%H:%M:%S (%m/%d)'))
 
             result.append(id)
             result.append(INDEX_LIST[i][3])
@@ -192,8 +197,11 @@ def add_result_to_list(json_str, stock_type):
                 name = u'上櫃'
 
             date = datetime.strptime(j["d"], '%Y%m%d')
+            if now.tm_mon == date.month and now.tm_mday == date.day:
+                time_str = j["t"] + ' (today)'
+            else:
+                time_str = j["t"] + date.strftime(' (%m/%d)')
 
-            time_str = j["t"] + date.strftime(' (%m/%d)')
             result.append(stock_no)
             result.append(name)
             result.append(j["z"])
