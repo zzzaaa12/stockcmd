@@ -45,10 +45,11 @@ def usage():
     print ''
     print 'Options:'
     print '    -a: list all stock infomation (include TSE, OTC, other stock)'
+    print '    -s: list information with simple format'
     print '    -i: list include TSE index and OTC index'
     print '    -w: list International Stock Indexes'
     print '    -q: list the stocks predefined'
-    print '    -c: colorful print result'
+    print '    -c: list with color'
     print '    -h: show this page'
     print ''
     print 'Example:'
@@ -75,7 +76,7 @@ def remove_special_char(string):
     return re.sub(r'[^\x00-\x7F]','', string)
 
 
-def print_result():
+def print_result(show_simple):
     for i in range(len(ALL_RESULT)):
         type = ALL_RESULT[i][7]
         last_type = ALL_RESULT[i-1][7]
@@ -84,7 +85,7 @@ def print_result():
         item_color = ''
         color_end = ''
 
-        if color_print == True:
+        if color_print:
             title_color = YELLOW
             color_end = COLOR_END
             change = ALL_RESULT[i][3]
@@ -93,7 +94,13 @@ def print_result():
             elif float(change) < 0:
                 item_color = GREEN
 
-        if type == 'index':
+        if show_simple:
+            print item_color + ' ' + \
+                  '{0:s}\t  '.format(ALL_RESULT[i][0]) + \
+                  '{0:>9s}'.format(ALL_RESULT[i][2]) + \
+                  '{0:>9s}   {1:s}%'.format(ALL_RESULT[i][3], ALL_RESULT[i][4]) + color_end
+
+        elif type == 'index':
             if i == 0:
                 print title_color + ' 代號      指數          點數        漲跌      百分比                 資料時間' + color_end
                 print '---------------------------------------------------------------------------------'
@@ -123,7 +130,9 @@ def print_result():
                   '{0:>9s}%'.format(ALL_RESULT[i][4]) + ' ' + \
                   '{0:>9s}'.format(ALL_RESULT[i][5]) + ' ' + \
                   '{0:>21s}'.format(ALL_RESULT[i][6]) + color_end
-    print ''
+
+    if show_simple == False:
+        print ''
 
 
 def add_result_to_list(json_str, stock_type):
@@ -148,7 +157,7 @@ def add_result_to_list(json_str, stock_type):
             result.append(INDEX_LIST[i][3])
             result.append(j["l"])
             result.append(j["c"])
-            result.append(j["cp"])
+            result.append(ratio)
             result.append(' ')
             result.append(time_str)
             result.append("index")
@@ -245,6 +254,7 @@ def main():
     add_world = False
     add_twse = False
     add_stock_list = False
+    show_simple = False
 
     if len(argv) == 1:
         # no parameter, show usage()
@@ -269,6 +279,9 @@ def main():
             add_twse = True
         elif str(x) == '-q':
             add_stock_list = True
+        elif str(x) == '-s':
+            show_simple = True
+            add_stock_list = True
         elif str(x) == '-h':
             usage()
             exit()
@@ -289,7 +302,7 @@ def main():
     if tw_url != TWSE_URL:
         get_tw_stock_info(tw_url)
 
-    print_result();
+    print_result(show_simple);
 
 
 if __name__ == '__main__':
