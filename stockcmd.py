@@ -38,6 +38,7 @@ color_print = False
 RED = '\033[1;31;40m'
 GREEN = '\033[1;32;40m'
 YELLOW = '\033[1;33;40m'
+WHITE = '\033[1;37;40m'
 COLOR_END = '\033[0m'
 
 
@@ -97,6 +98,8 @@ def print_result(show_simple):
                 item_color = RED
             elif float(change) < 0:
                 item_color = GREEN
+            else:
+                item_color = WHITE
 
         if show_simple:
             print item_color + ' ' + \
