@@ -8,6 +8,10 @@ stockcmd
 4. 可依據漲跌狀態標記顏色  
 
 ---------
+**檔案說明：**  
+ - stockcmd.py：主程式  
+ - otc.csv & tse.csv：台股上市&上櫃股票清單  
+ 
 **格式：**  
 
     stockcmd.py [Options] [Stock_No]
@@ -22,10 +26,14 @@ stockcmd
     -c: 顯示彩色畫面
     -h: 顯示說明頁面
 
-**檔案說明：**  
- - stockcmd.py：主程式  
- - otc.csv & tse.csv：台股上市&上櫃股票清單  
-
+**自訂預設值：**  
+使用者可直接修改下列在 stockcmd.py 的預設參數，在查詢時省略上面的參數  
+1. SIMPLE_OUTPUT - 預設為簡易模式 (只有股號、股價、漲跌、百分比)  
+2. COLORFUL_OUTPUT - 預設輸出彩色文字  
+3. SHOW_TWSE_INDEX - 加入上市上櫃指數  
+4. SHOW_WORLD_INDEX - 加入國外指數  
+5. ADD_USER_STOCK_LIST - 加入使用者自定義股票  
+  
 **使用範例：**  
 
 ![Alt text](/snapshot.png "Snapshot")
