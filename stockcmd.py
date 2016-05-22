@@ -9,12 +9,19 @@ import time
 from datetime import datetime
 from datetime import timedelta
 
-# User Setting: stock list and file path
+# User Setting1: Default output format
+SIMPLE_OUTPUT = False
+COLORFUL_OUTPUT = False
+SHOW_TWSE_INDEX = False
+SHOW_WORLD_INDEX = False
+ADD_USER_STOCK_LIST = False
+
+# User Setting2: Stock list and file path
 TW_STOCK_LIST = ['2330', '2317', '3008', '00631L', '00632R']
 TSE_FILE = 'tse.csv'
 OTC_FILE = 'otc.csv'
 
-# Server Setting
+# Server Setting:
 TWSE_SERVER = '220.229.103.179'
 TWSE_URL = 'http://' + TWSE_SERVER + '/stock/api/getStockInfo.jsp?ex_ch='
 GOOGLE_URL = 'http://www.google.com/finance/info?q='
@@ -269,8 +276,12 @@ def main():
     add_twse = False
     add_stock_list = False
     show_simple = False
+    global color_print
 
-    if len(argv) == 1:
+    if len(argv) == 1 and \
+       SHOW_TWSE_INDEX == False and \
+       SHOW_WORLD_INDEX == False and \
+       ADD_USER_STOCK_LIST == False:
         # no parameter, show usage()
         usage()
         exit()
@@ -281,10 +292,9 @@ def main():
     # read parameters
     for x in argv:
         if str(x) == '-c':
-            global color_print
             color_print = True
         elif str(x) == '-a':
-            add_world = True;
+            add_world = True
             add_twse = True
             add_stock_list = True
         elif str(x) == '-w':
@@ -296,9 +306,21 @@ def main():
         elif str(x) == '-s':
             show_simple = True
             add_stock_list = True
-        elif str(x) == '-h':
+        elif str(x) == '-h' or str(x) == '--help':
             usage()
             exit()
+
+    # load default setting
+    if SIMPLE_OUTPUT:
+        show_simple = True
+    if COLORFUL_OUTPUT:
+        color_print = True
+    if SHOW_TWSE_INDEX:
+        add_twse = True
+    if SHOW_WORLD_INDEX:
+        add_world = True
+    if ADD_USER_STOCK_LIST:
+        add_stock_list = True
 
     # generate query url
     tw_url = create_tw_stock_url(add_twse, add_stock_list, argv)
