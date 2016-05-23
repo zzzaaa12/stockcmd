@@ -36,18 +36,24 @@ stockcmd
   
 **使用範例：**  
 
-![Alt text](/snapshot.png "Snapshot")
+1. 自選股報價  
+![Alt text](/screenshot/1.png "Snapshot")  
 
-    stockcmd $ ./stockcmd.py -s
-    2330        148.50     +1.5   +1.02%
-    2317         74.00     -0.2   -0.27%
-    3008       2645.00    +45.0   +1.73%
-    00631L       17.51    +0.25   +1.45%
-    00632R       19.75    -0.15   -0.75%
+2. 自選股 + 上市上櫃指數  
+![Alt text](/screenshot/2.png "Snapshot")  
 
+3. 自選股 (簡易模式)  
+![Alt text](/screenshot/3.png "Snapshot")  
+
+4. 國際指數  
+![Alt text](/screenshot/4.png "Snapshot")  
+
+5. 列出所有資訊 (股票清單、上市上櫃、國際股市)  
+![Alt text](/screenshot/5.png "Snapshot")  
 
 **規劃中功能：**  
 - 自訂股票清單 - 已完成  
 - 顯色彩色文字 - 已完成  
 - 增加國際指數時間 - 已完成  
 - 國際指數的時區轉換 - 已完成 (但沒有日光節約時間)  
+- 加入台指期資訊
