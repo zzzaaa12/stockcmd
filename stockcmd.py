@@ -6,6 +6,7 @@ import json
 import requests
 import re
 import time
+import os
 from datetime import datetime
 from datetime import timedelta
 
@@ -15,6 +16,7 @@ COLORFUL_OUTPUT = False
 SHOW_TWSE_INDEX = False
 SHOW_WORLD_INDEX = False
 ADD_USER_STOCK_LIST = False
+AUTO_UPDATE_SECOND = 20
 
 # User Setting2: Stock list and file path
 TW_STOCK_LIST = ['2330', '2317', '3008', '00631L', '00632R']
@@ -62,6 +64,7 @@ def usage():
     print '    -w: list International Stock Indexes'
     print '    -q: list the stocks predefined'
     print '    -c: list with color'
+    print '    -d: continue update information every 20 seconds'
     print '    -h: show this page'
     print ''
     print 'Example:'
@@ -88,7 +91,11 @@ def remove_special_char(string):
     return re.sub(r'[^\x00-\x7F]','', string)
 
 
-def print_result(show_simple):
+def print_result(show_simple, auto_update):
+
+    if auto_update:
+        os.system('clear || cls')
+
     for i in range(len(ALL_RESULT)):
         type = ALL_RESULT[i][7]
         last_type = ALL_RESULT[i-1][7]
@@ -247,12 +254,16 @@ def create_tw_stock_url(add_twse, add_stock_list, argv):
     return url;
 
 
-# query world index:
-def get_world_index_info():
+def create_world_index_url():
     url = GOOGLE_URL
     for item in INDEX_LIST:
         url = url + item[0] + ','
 
+    return url
+
+
+# query world index:
+def get_world_index_info(url):
     result = requests.get(url)
     json_str = remove_special_char(result.content.replace('// ', '', 1))
     add_result_to_list(json_str, 'world')
@@ -276,6 +287,7 @@ def main():
     add_twse = False
     add_stock_list = False
     show_simple = False
+    auto_update = False
     global color_print
 
     if len(argv) == 1 and \
@@ -306,6 +318,8 @@ def main():
         elif str(x) == '-s':
             show_simple = True
             add_stock_list = True
+        elif str(x) == '-d':
+            auto_update = True
         elif str(x) == '-h' or str(x) == '--help':
             usage()
             exit()
@@ -324,22 +338,30 @@ def main():
 
     # generate query url
     tw_url = create_tw_stock_url(add_twse, add_stock_list, argv)
+    world_url = create_world_index_url()
 
     # show usage() if there is no index or stock
     if tw_url == TWSE_URL and add_world == False:
         usage()
         exit()
 
-    # access google finance for world index
-    if add_world:
-        get_world_index_info()
+    while True:
+        # access google finance for world index
+        if add_world:
+            get_world_index_info(world_url)
 
-    # access twse server for taiwan stock
-    if tw_url != TWSE_URL:
-        get_tw_stock_info(tw_url)
+        # access twse server for taiwan stock
+        if tw_url != TWSE_URL:
+            get_tw_stock_info(tw_url)
 
-    print_result(show_simple);
+        print_result(show_simple, auto_update);
 
+        if auto_update == False:
+            break
+
+        del ALL_RESULT[:]
+        time.sleep(AUTO_UPDATE_SECOND)
+        os.system('clear || cls')
 
 if __name__ == '__main__':
     main()
