@@ -361,7 +361,6 @@ def main():
 
         del ALL_RESULT[:]
         time.sleep(AUTO_UPDATE_SECOND)
-        os.system('clear || cls')
 
 if __name__ == '__main__':
     main()
