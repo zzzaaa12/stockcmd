@@ -123,8 +123,8 @@ def print_result(show_simple, auto_update):
 
         elif type == 'index':
             if i == 0:
-                print title_color + ' 代號      指數          點數        漲跌      百分比                 資料時間' + color_end
-                print '---------------------------------------------------------------------------------'
+                print title_color + ' 代號      指數          點數         漲跌     百分比       資料時間' + color_end
+                print '-----------------------------------------------------------------------'
 
             # print all data
             print item_color + ' ' + \
@@ -133,24 +133,24 @@ def print_result(show_simple, auto_update):
                   '{0:>14s}'.format(ALL_RESULT[i][2]) + ' ' + \
                   '{0:>10s}'.format(ALL_RESULT[i][3]) + ' ' + \
                   '{0:>9s}%'.format(ALL_RESULT[i][4]) + ' ' + \
-                  '{0:>28s}'.format(ALL_RESULT[i][6]) + color_end
+                  '{0:>18s}'.format(ALL_RESULT[i][6]) + color_end
 
         elif type == 'stock':
             if (i == 0 or last_type != 'stock'):
                 if i > 0:
                     print ''
-                print title_color + ' 股號     股名       成交價       漲跌      百分比     成交量         資料時間' + color_end
-                print '-----------------------------------------------------------------------------------'
+                print title_color + ' 股號     股名     成交價     漲跌    百分比   成交量       資料時間' + color_end
+                print '-------------------------------------------------------------------------'
 
             # print all data
             print item_color + ' ' + \
                   '{0:s}'.format(ALL_RESULT[i][0]) + '\t ' + \
                   ALL_RESULT[i][1] + '\t' + \
-                  '{0:>12s}'.format(ALL_RESULT[i][2]) + ' ' + \
-                  '{0:>10s}'.format(ALL_RESULT[i][3]) + ' ' + \
-                  '{0:>9s}%'.format(ALL_RESULT[i][4]) + ' ' + \
-                  '{0:>9s}'.format(ALL_RESULT[i][5]) + ' ' + \
-                  '{0:>21s}'.format(ALL_RESULT[i][6]) + color_end
+                  '{0:>9s}'.format(ALL_RESULT[i][2]) + ' ' + \
+                  '{0:>8s}'.format(ALL_RESULT[i][3]) + ' ' + \
+                  '{0:>8s}%'.format(ALL_RESULT[i][4]) + ' ' + \
+                  '{0:>8s}'.format(ALL_RESULT[i][5]) + ' ' + \
+                  '{0:>18s}'.format(ALL_RESULT[i][6]) + color_end
 
     if show_simple == False:
         print ''
