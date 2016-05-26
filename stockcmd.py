@@ -7,8 +7,10 @@ import requests
 import re
 import time
 import os
+import urllib
 from datetime import datetime
 from datetime import timedelta
+from HTMLParser import HTMLParser
 
 # User Setting1: Default output format
 SIMPLE_OUTPUT = False
@@ -73,6 +75,25 @@ def usage():
     print '    stockcmd.py -q'
     print '    stockcmd.py 2330 2317 3008'
     print ''
+
+
+class future_parser(HTMLParser):
+    def __init__(self):
+        HTMLParser.__init__(self)
+        self.data = []
+        self.item_limit = 15
+        self.item_index = 0
+    def handle_starttag(self, tag, attrs):
+        if tag == 'td':
+            for attr in attrs:
+                if attr[1] == 'bu13':
+                    self.item_index = self.item_index + 1
+                    break
+    def handle_data(self, data):
+        if self.item_index == 3 or self.item_index == 4:
+            if self.item_limit and len(data) < 14:
+                self.item_limit = self.item_limit - 1
+                self.data.append(data)
 
 
 def search_stock(stock_no, filename):
@@ -152,6 +173,35 @@ def print_result(show_simple, auto_update):
 
     if show_simple == False:
         print datetime.now().strftime('\nLast updated: %Y.%m.%d %H:%M:%S\n')
+
+
+def get_tw_future():
+    sign = ''
+    future = future_parser()
+    future.feed(urllib.urlopen("http://info512.taifex.com.tw/Future/FusaQuote_Norl.aspx").read())
+    future.close()
+
+    change = float(future.data[7])
+    if change > 0:
+        sign = '+'
+    elif change < 0:
+        sign = '-'
+
+    result = []
+    result.append("WTX")
+    result.append("台指期")
+    result.append(future.data[6].replace(',',''))
+    result.append(sign + future.data[7])
+    result.append(sign + future.data[8])
+    result.append(future.data[9].replace(',',''))
+    result.append("stock")
+
+    if (future.data[1] == '收盤'):
+        result.append(future.data[14] + ' (close)')
+    else:
+        result.append(future.data[14] + '        ')
+
+    ALL_RESULT.append(result)
 
 
 def add_result_to_list(json_str, stock_type):
@@ -356,6 +406,9 @@ def main():
         # access google finance for world index
         if add_world:
             get_world_index_info(world_url)
+
+        if add_twse:
+            get_tw_future()
 
         # access twse server for taiwan stock
         if tw_url != TWSE_URL:
