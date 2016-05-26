@@ -123,7 +123,7 @@ def print_result(show_simple, auto_update):
 
         elif type == 'index':
             if i == 0:
-                print title_color + ' 代號      指數          點數         漲跌     百分比       資料時間' + color_end
+                print '\n' + title_color + ' 代號      指數          點數         漲跌     百分比       資料時間' + color_end
                 print '-----------------------------------------------------------------------'
 
             # print all data
@@ -137,9 +137,7 @@ def print_result(show_simple, auto_update):
 
         elif type == 'stock':
             if (i == 0 or last_type != 'stock'):
-                if i > 0:
-                    print ''
-                print title_color + ' 股號     股名     成交價     漲跌    百分比   成交量       資料時間' + color_end
+                print '\n' + title_color + ' 股號     股名     成交價     漲跌    百分比   成交量       資料時間' + color_end
                 print '-------------------------------------------------------------------------'
 
             # print all data
@@ -152,8 +150,8 @@ def print_result(show_simple, auto_update):
                   '{0:>8s}'.format(ALL_RESULT[i][5]) + ' ' + \
                   '{0:>18s}'.format(ALL_RESULT[i][7]) + color_end
 
-    if show_simple == False and auto_update == False:
-        print ''
+    if show_simple == False:
+        print datetime.now().strftime('\nLast updated: %Y.%m.%d %H:%M:%S\n')
 
 
 def add_result_to_list(json_str, stock_type):
