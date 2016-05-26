@@ -97,8 +97,8 @@ def print_result(show_simple, auto_update):
         os.system('clear || cls')
 
     for i in range(len(ALL_RESULT)):
-        type = ALL_RESULT[i][7]
-        last_type = ALL_RESULT[i-1][7]
+        type = ALL_RESULT[i][6]
+        last_type = ALL_RESULT[i-1][6]
 
         title_color = ''
         item_color = ''
@@ -133,7 +133,7 @@ def print_result(show_simple, auto_update):
                   '{0:>14s}'.format(ALL_RESULT[i][2]) + ' ' + \
                   '{0:>10s}'.format(ALL_RESULT[i][3]) + ' ' + \
                   '{0:>9s}%'.format(ALL_RESULT[i][4]) + ' ' + \
-                  '{0:>18s}'.format(ALL_RESULT[i][6]) + color_end
+                  '{0:>18s}'.format(ALL_RESULT[i][7]) + color_end
 
         elif type == 'stock':
             if (i == 0 or last_type != 'stock'):
@@ -150,16 +150,16 @@ def print_result(show_simple, auto_update):
                   '{0:>8s}'.format(ALL_RESULT[i][3]) + ' ' + \
                   '{0:>8s}%'.format(ALL_RESULT[i][4]) + ' ' + \
                   '{0:>8s}'.format(ALL_RESULT[i][5]) + ' ' + \
-                  '{0:>18s}'.format(ALL_RESULT[i][6]) + color_end
+                  '{0:>18s}'.format(ALL_RESULT[i][7]) + color_end
 
-    if show_simple == False:
+    if show_simple == False and auto_update == False:
         print ''
 
 
 def add_result_to_list(json_str, stock_type):
     # read json data
     json_data = json.loads(json_str)
-    now = time.localtime()
+    now = datetime.now()
 
     if stock_type == 'world':
         for i in range(len(INDEX_LIST)):
@@ -172,11 +172,14 @@ def add_result_to_list(json_str, stock_type):
                 ratio = '+' + ratio
 
             timezone = int(INDEX_LIST[i][2])
-            last_time = datetime.strptime(j["lt_dts"], '%Y-%m-%dT%H:%M:%SZ') + timedelta(hours = 8-timezone)
-            if now.tm_mon == last_time.month and now.tm_mday == last_time.day:
-                time_str = str(last_time.strftime('%H:%M:%S (today)'))
+            result_time = datetime.strptime(j["lt_dts"], '%Y-%m-%dT%H:%M:%SZ') + timedelta(hours = 8-timezone)
+
+            if (now-result_time).total_seconds() < 1800:
+                time_str = str(result_time.strftime('    %H:%M:%S    '))
+            elif now.month == result_time.month and now.day == result_time.day:
+                time_str = str(result_time.strftime('%H:%M:%S (today)'))
             else:
-                time_str = str(last_time.strftime('%H:%M:%S (%m/%d)'))
+                time_str = str(result_time.strftime('%H:%M:%S (%m/%d)'))
 
             result.append(id)
             result.append(INDEX_LIST[i][3])
@@ -184,8 +187,8 @@ def add_result_to_list(json_str, stock_type):
             result.append(j["c"])
             result.append(ratio)
             result.append(' ')
-            result.append(time_str)
             result.append("index")
+            result.append(time_str)
             ALL_RESULT.append(result)
 
     elif stock_type == 'tw':
@@ -214,7 +217,13 @@ def add_result_to_list(json_str, stock_type):
                 name = u'上櫃'
 
             date = datetime.strptime(j["d"], '%Y%m%d')
-            if now.tm_mon == date.month and now.tm_mday == date.day:
+
+            result_time_str = j["d"] + ' ' + j["t"]
+            result_time = datetime.strptime(result_time_str, '%Y%m%d %H:%M:%S')
+
+            if (now-result_time).total_seconds() < 1800:
+                time_str = '    ' + j["t"] + '    '
+            elif now.month == date.month and now.day == date.day:
                 time_str = j["t"] + ' (today)'
             else:
                 time_str = j["t"] + date.strftime(' (%m/%d)')
@@ -225,8 +234,8 @@ def add_result_to_list(json_str, stock_type):
             result.append(change_str)
             result.append(change_str_p)
             result.append(j["v"])
-            result.append(time_str)
             result.append("stock")
+            result.append(time_str)
             ALL_RESULT.append(result)
 
 
