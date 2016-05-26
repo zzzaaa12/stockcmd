@@ -123,7 +123,7 @@ def print_result(show_simple, auto_update):
 
         elif type == 'index':
             if i == 0:
-                print '\n' + title_color + ' 代號      指數          點數         漲跌     百分比       資料時間' + color_end
+                print '\n' + title_color + ' 代號      指數          點數         漲跌     百分比         資料時間' + color_end
                 print '-----------------------------------------------------------------------'
 
             # print all data
@@ -133,11 +133,11 @@ def print_result(show_simple, auto_update):
                   '{0:>14s}'.format(ALL_RESULT[i][2]) + ' ' + \
                   '{0:>10s}'.format(ALL_RESULT[i][3]) + ' ' + \
                   '{0:>9s}%'.format(ALL_RESULT[i][4]) + ' ' + \
-                  '{0:>18s}'.format(ALL_RESULT[i][7]) + color_end
+                  '{0:>20s}'.format(ALL_RESULT[i][7]) + color_end
 
         elif type == 'stock':
             if (i == 0 or last_type != 'stock'):
-                print '\n' + title_color + ' 股號     股名     成交價     漲跌    百分比   成交量       資料時間' + color_end
+                print '\n' + title_color + ' 股號     股名     成交價     漲跌    百分比   成交量         資料時間' + color_end
                 print '-------------------------------------------------------------------------'
 
             # print all data
@@ -148,7 +148,7 @@ def print_result(show_simple, auto_update):
                   '{0:>8s}'.format(ALL_RESULT[i][3]) + ' ' + \
                   '{0:>8s}%'.format(ALL_RESULT[i][4]) + ' ' + \
                   '{0:>8s}'.format(ALL_RESULT[i][5]) + ' ' + \
-                  '{0:>18s}'.format(ALL_RESULT[i][7]) + color_end
+                  '{0:>20s}'.format(ALL_RESULT[i][7]) + color_end
 
     if show_simple == False:
         print datetime.now().strftime('\nLast updated: %Y.%m.%d %H:%M:%S\n')
@@ -173,7 +173,7 @@ def add_result_to_list(json_str, stock_type):
             result_time = datetime.strptime(j["lt_dts"], '%Y-%m-%dT%H:%M:%SZ') + timedelta(hours = 8-timezone)
 
             if (now-result_time).total_seconds() < 1800:
-                time_str = str(result_time.strftime('    %H:%M:%S    '))
+                time_str = str(result_time.strftime('%H:%M:%S        '))
             elif now.month == result_time.month and now.day == result_time.day:
                 time_str = str(result_time.strftime('%H:%M:%S (today)'))
             else:
@@ -219,8 +219,8 @@ def add_result_to_list(json_str, stock_type):
             result_time_str = j["d"] + ' ' + j["t"]
             result_time = datetime.strptime(result_time_str, '%Y%m%d %H:%M:%S')
 
-            if (now-result_time).total_seconds() < 1800:
-                time_str = '    ' + j["t"] + '    '
+            if (now-result_time).total_seconds() < 300:
+                time_str = j["t"] + '        '
             elif now.month == date.month and now.day == date.day:
                 time_str = j["t"] + ' (today)'
             else:
