@@ -207,7 +207,7 @@ def get_tw_future():
         result.append(sign + future.data[7])
         result.append(future.data[8].replace(',',''))
         result.append("stock")
-        result.append(future.data[13] + '        ')
+        result.append('    ' + future.data[13] + '    ')
 
     ALL_RESULT.append(result)
 
@@ -278,10 +278,11 @@ def add_result_to_list(json_str, stock_type):
             result_time_str = j["d"] + ' ' + j["t"]
             result_time = datetime.strptime(result_time_str, '%Y%m%d %H:%M:%S')
 
-            if (now-result_time).total_seconds() < 300:
-                time_str = j["t"] + '        '
-            elif now.month == date.month and now.day == date.day:
-                time_str = j["t"] + ' (today)'
+            if now.month == date.month and now.day == date.day:
+                if (now.hour > 13) or (now.hour == 13 and now.minute > 30):
+                    time_str = j["t"] + ' (today)'
+                else:
+                    time_str = '    ' + j["t"] + '    '
             else:
                 time_str = j["t"] + date.strftime(' (%m/%d)')
 
