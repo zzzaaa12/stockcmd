@@ -8,6 +8,7 @@ import re
 import time
 import os
 import urllib
+import select
 from datetime import datetime
 from datetime import timedelta
 from HTMLParser import HTMLParser
@@ -355,6 +356,7 @@ def main():
     add_stock_list = False
     show_simple = False
     auto_update = False
+    hidden_help = False
     global color_print
 
     if len(argv) == 1 and \
@@ -430,7 +432,34 @@ def main():
             break
 
         del ALL_RESULT[:]
-        time.sleep(AUTO_UPDATE_SECOND)
+
+        # receive input command to do something
+        if not hidden_help:
+            print 'Commands: Q->Exit, C->Color, S->Simple, I->TWSE, W->World, U->User\'s List'
+
+        for x in range(1, AUTO_UPDATE_SECOND, 1):
+            input_cmd = ''
+            i, o, e = select.select([sys.stdin], [], [], 1)
+            if not i:
+                continue
+            input = sys.stdin.readline().strip().lower()
+            if input == 'q':
+                exit()
+            elif input == 'c':
+                color_print = not color_print
+            elif input == 's':
+                show_simple = not show_simple
+            elif input == 'i':
+                add_twse = not add_twse
+            elif input == 'w':
+                add_world = not add_world
+            elif input == 'u':
+                add_stock_list = not add_stock_list
+            elif input == 'h':
+                hidden_help = not hidden_help
+
+            tw_url = create_tw_stock_url(add_twse, add_stock_list, argv)
+            break;
 
 if __name__ == '__main__':
     main()
