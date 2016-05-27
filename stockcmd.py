@@ -172,7 +172,10 @@ def print_result(show_simple, auto_update):
                   '{0:>20s}'.format(ALL_RESULT[i][7]) + color_end
 
     if show_simple == False:
-        print datetime.now().strftime('\nLast updated: %Y.%m.%d %H:%M:%S\n')
+        if auto_update:
+            print datetime.now().strftime('\nLast updated: %Y.%m.%d %H:%M:%S')
+        else:
+            print ''
 
 
 def get_tw_future():
