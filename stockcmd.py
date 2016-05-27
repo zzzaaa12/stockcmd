@@ -190,16 +190,21 @@ def get_tw_future():
     result = []
     result.append("WTX")
     result.append("台指期")
-    result.append(future.data[6].replace(',',''))
-    result.append(sign + future.data[7])
-    result.append(sign + future.data[8])
-    result.append(future.data[9].replace(',',''))
-    result.append("stock")
 
     if (future.data[1] == '收盤'):
+        result.append(future.data[6].replace(',',''))
+        result.append(sign + future.data[7])
+        result.append(sign + future.data[8])
+        result.append(future.data[9].replace(',',''))
+        result.append("stock")
         result.append(future.data[14] + ' (close)')
     else:
-        result.append(future.data[14] + '        ')
+        result.append(future.data[5].replace(',',''))
+        result.append(sign + future.data[6])
+        result.append(sign + future.data[7])
+        result.append(future.data[8].replace(',',''))
+        result.append("stock")
+        result.append(future.data[13] + '        ')
 
     ALL_RESULT.append(result)
 
@@ -240,6 +245,7 @@ def add_result_to_list(json_str, stock_type):
             ALL_RESULT.append(result)
 
     elif stock_type == 'tw':
+        # FIXME: console sometimes show "KeyError: 'msgArray'"
         for i in range(len(json_data['msgArray'])):
             result = []
             j = json_data['msgArray'][i]
