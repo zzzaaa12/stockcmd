@@ -191,14 +191,14 @@ def get_tw_future():
         volume  = future.data[9].replace(',','')
         timestr = future.data[14] + ' (close)'
         last_day_price = float(future.data[13].replace(',',''))
-        ratio = '{0:.02f}%'.format(change / last_day_price * 100)
+        ratio = '{0:.02f}'.format(change / last_day_price * 100)
     else:
         price = float(future.data[5].replace(',',''))
         change = float(future.data[6])
         volume = future.data[8].replace(',','')
         timestr = future.data[13] + '        '
         last_day_price = float(future.data[12].replace(',',''))
-        ratio = '{0:.02f}%'.format(change / last_day_price * 100)
+        ratio = '{0:.02f}'.format(change / last_day_price * 100)
 
     if change > 0:
         sign = '+'
