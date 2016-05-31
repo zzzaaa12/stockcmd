@@ -185,31 +185,38 @@ def get_tw_future():
     future.feed(urllib.urlopen("http://info512.taifex.com.tw/Future/FusaQuote_Norl.aspx").read())
     future.close()
 
-    change = float(future.data[7])
+    if (future.data[1] == '收盤'):
+        price   = float(future.data[6].replace(',',''))
+        change  = float(future.data[7])
+        volume  = future.data[9].replace(',','')
+        timestr = future.data[14] + ' (close)'
+        last_day_price = float(future.data[13].replace(',',''))
+        ratio = '{0:.02f}%'.format(change / last_day_price * 100)
+    else:
+        price = float(future.data[5].replace(',',''))
+        change = float(future.data[6])
+        volume = future.data[8].replace(',','')
+        timestr = future.data[13] + '        '
+        last_day_price = float(future.data[12].replace(',',''))
+        ratio = '{0:.02f}%'.format(change / last_day_price * 100)
+
     if change > 0:
         sign = '+'
-    elif change < 0:
-        sign = '-'
+    else:
+        sign = ''
+
+    change_str = sign + str(change)
+    ratio_str = sign + ratio
 
     result = []
-    result.append("WTX")
-    result.append("台指期")
-
-    if (future.data[1] == '收盤'):
-        result.append(future.data[6].replace(',',''))
-        result.append(sign + future.data[7])
-        result.append(sign + future.data[8])
-        result.append(future.data[9].replace(',',''))
-        result.append("stock")
-        result.append(future.data[14] + ' (close)')
-    else:
-        result.append(future.data[5].replace(',',''))
-        result.append(sign + future.data[6])
-        result.append(sign + future.data[7])
-        result.append(future.data[8].replace(',',''))
-        result.append("stock")
-        result.append('    ' + future.data[13] + '    ')
-
+    result.append('WTX')
+    result.append('台指期')
+    result.append(str(price))
+    result.append(change_str)
+    result.append(ratio_str)
+    result.append(volume)
+    result.append('stock')
+    result.append(timestr)
     ALL_RESULT.append(result)
 
 
@@ -262,7 +269,7 @@ def add_result_to_list(json_str, stock_type):
             else:
                 sign = ' '
 
-            change_str = sign + str(diff)
+            change_str = sign + '{0:.2f}'.format(diff)
             change_str_p = sign + '{0:.2f}'.format(diff / float(j["y"]) *100)
 
             stock_no = j["c"]
@@ -341,7 +348,7 @@ def get_world_index_info(url):
 def get_tw_stock_info(url):
     #   access the index first and then send request for stock list
     r = requests.session()
-    r.get('http://' + TWSE_SERVER + '/stock/index.jsp', headers = {'Accept-Language':'zh-TW'}, timeout=2)
+    r.get('http://' + TWSE_SERVER + '/stock/index.jsp', headers = {'Accept-Language':'zh-TW'}, timeout=5)
     result = r.get(url)
 
     json_str = result.content
