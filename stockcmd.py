@@ -145,22 +145,22 @@ def print_result(show_simple, auto_update):
 
         elif type == 'index':
             if i == 0:
-                print '\n' + title_color + ' 代號      指數          點數         漲跌     百分比         資料時間' + color_end
-                print '-----------------------------------------------------------------------'
+                print '\n' + title_color + ' 代號      指數          點數         漲跌     百分比     資料時間' + color_end
+                print '---------------------------------------------------------------------------'
 
             # print all data
             print item_color + ' ' + \
                   '{0:8s}'.format(ALL_RESULT[i][0]) + \
                   '{0:<10s}'.format(ALL_RESULT[i][1]) + \
-                  '{0:>14s}'.format(ALL_RESULT[i][2]) + ' ' + \
-                  '{0:>10s}'.format(ALL_RESULT[i][3]) + ' ' + \
+                  '{0:>13s}'.format(ALL_RESULT[i][2]) + ' ' + \
+                  '{0:>11s}'.format(ALL_RESULT[i][3]) + ' ' + \
                   '{0:>9s}%'.format(ALL_RESULT[i][4]) + ' ' + \
                   '{0:>20s}'.format(ALL_RESULT[i][7]) + color_end
 
         elif type == 'stock':
             if (i == 0 or last_type != 'stock'):
-                print '\n' + title_color + ' 股號     股名     成交價     漲跌    百分比   成交量         資料時間' + color_end
-                print '-------------------------------------------------------------------------'
+                print '\n' + title_color + ' 股號     股名     成交價     漲跌    百分比   成交量     資料時間' + color_end
+                print '---------------------------------------------------------------------------'
 
             # print all data
             print item_color + ' ' + \
@@ -205,13 +205,13 @@ def get_tw_future():
     else:
         sign = ''
 
-    change_str = sign + str(change)
+    change_str = sign + '{0:.0f} '.format(change)
     ratio_str = sign + ratio
 
     result = []
     result.append('WTX')
     result.append('台指期')
-    result.append(str(price))
+    result.append('{0:.0f} '.format(price))
     result.append(change_str)
     result.append(ratio_str)
     result.append(volume)
@@ -247,7 +247,7 @@ def add_result_to_list(json_str, stock_type):
 
             result.append(id)
             result.append(INDEX_LIST[i][3])
-            result.append(j["l"])
+            result.append(j["l"].replace(',',''))
             result.append(j["c"])
             result.append(ratio)
             result.append(' ')
@@ -260,6 +260,7 @@ def add_result_to_list(json_str, stock_type):
         for i in range(len(json_data['msgArray'])):
             result = []
             j = json_data['msgArray'][i]
+            price = j["z"]
             diff = float(j["z"]) - float(j["y"])
 
             if diff > 0:
@@ -274,12 +275,17 @@ def add_result_to_list(json_str, stock_type):
 
             stock_no = j["c"]
             name = j["n"]
+            volume = j["v"]
 
             # fix too long name.....
             if stock_no == 't00':
                 name = u'上市'
+                price = '{0:.0f} '.format(float(price))
+                change_str = sign + '{0:.0f} '.format(diff)
+                volume = '{0:d}'.format(int(volume)/100)
             elif stock_no == 'o00':
                 name = u'上櫃'
+                volume = '{0:d}'.format(int(volume)/100)
 
             date = datetime.strptime(j["d"], '%Y%m%d')
 
@@ -290,16 +296,16 @@ def add_result_to_list(json_str, stock_type):
                 if (now.hour > 13) or (now.hour == 13 and now.minute > 30):
                     time_str = j["t"] + ' (today)'
                 else:
-                    time_str = '    ' + j["t"] + '    '
+                    time_str = j["t"] + '        '
             else:
                 time_str = j["t"] + date.strftime(' (%m/%d)')
 
             result.append(stock_no)
             result.append(name)
-            result.append(j["z"])
+            result.append(price)
             result.append(change_str)
             result.append(change_str_p)
-            result.append(j["v"])
+            result.append(volume)
             result.append("stock")
             result.append(time_str)
             ALL_RESULT.append(result)
