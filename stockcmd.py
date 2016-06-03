@@ -138,6 +138,8 @@ def print_result(show_simple, auto_update):
                 item_color = WHITE
 
         if show_simple:
+            if type == 'stock' and last_type != 'stock':
+                print '--------------------------------------'
             print item_color + ' ' + \
                   '{0:s}\t  '.format(ALL_RESULT[i][0]) + \
                   '{0:>9s}'.format(ALL_RESULT[i][2]) + \
@@ -145,7 +147,7 @@ def print_result(show_simple, auto_update):
 
         elif type == 'index':
             if i == 0:
-                print '\n' + title_color + ' 代號      指數          點數         漲跌     百分比     資料時間' + color_end
+                print '\n' + title_color + ' 代號      指數          點數         漲跌     百分比    資料時間' + color_end
                 print '---------------------------------------------------------------------------'
 
             # print all data
@@ -155,11 +157,11 @@ def print_result(show_simple, auto_update):
                   '{0:>13s}'.format(ALL_RESULT[i][2]) + ' ' + \
                   '{0:>11s}'.format(ALL_RESULT[i][3]) + ' ' + \
                   '{0:>9s}%'.format(ALL_RESULT[i][4]) + ' ' + \
-                  '{0:>20s}'.format(ALL_RESULT[i][7]) + color_end
+                  '{0:>19s}'.format(ALL_RESULT[i][7]) + color_end
 
         elif type == 'stock':
             if (i == 0 or last_type != 'stock'):
-                print '\n' + title_color + ' 股號     股名     成交價     漲跌    百分比   成交量     資料時間' + color_end
+                print '\n' + title_color + ' 股號     股名     成交價     漲跌    百分比   成交量    資料時間' + color_end
                 print '---------------------------------------------------------------------------'
 
             # print all data
@@ -170,7 +172,7 @@ def print_result(show_simple, auto_update):
                   '{0:>8s}'.format(ALL_RESULT[i][3]) + ' ' + \
                   '{0:>8s}%'.format(ALL_RESULT[i][4]) + ' ' + \
                   '{0:>8s}'.format(ALL_RESULT[i][5]) + ' ' + \
-                  '{0:>20s}'.format(ALL_RESULT[i][7]) + color_end
+                  '{0:>19s}'.format(ALL_RESULT[i][7]) + color_end
 
     if show_simple == False:
         if auto_update:
