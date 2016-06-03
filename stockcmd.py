@@ -281,11 +281,13 @@ def add_result_to_list(json_str, stock_type):
 
             # fix too long name.....
             if stock_no == 't00':
+                stock_no = 'TWSE'
                 name = u'上市'
                 price = '{0:.0f} '.format(float(price))
                 change_str = sign + '{0:.0f} '.format(diff)
                 volume = '{0:d}'.format(int(volume)/100)
             elif stock_no == 'o00':
+                stock_no = 'OTC'
                 name = u'上櫃'
                 volume = '{0:d}'.format(int(volume)/100)
 
