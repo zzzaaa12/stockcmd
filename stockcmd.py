@@ -99,7 +99,6 @@ class future_parser(HTMLParser):
 
 def search_stock(stock_no, filename):
     ret = False
-
     f = open(filename,'r')
     for row in csv.reader(f):
         if row[0] == str(stock_no):
@@ -119,8 +118,8 @@ def print_result(show_simple, auto_update):
         os.system('clear || cls')
 
     for i in range(len(ALL_RESULT)):
-        type = ALL_RESULT[i][6]
-        last_type = ALL_RESULT[i-1][6]
+        type = ALL_RESULT[i]['type']
+        last_type = ALL_RESULT[i-1]['type']
 
         title_color = ''
         item_color = ''
@@ -129,7 +128,7 @@ def print_result(show_simple, auto_update):
         if color_print:
             title_color = YELLOW
             color_end = COLOR_END
-            change = ALL_RESULT[i][3]
+            change = ALL_RESULT[i]['change']
             if float(change) > 0:
                 item_color = RED
             elif float(change) < 0:
@@ -141,9 +140,9 @@ def print_result(show_simple, auto_update):
             if type == 'stock' and last_type != 'stock':
                 print '--------------------------------------'
             print item_color + ' ' + \
-                  '{0:s}\t  '.format(ALL_RESULT[i][0]) + \
-                  '{0:>9s}'.format(ALL_RESULT[i][2]) + \
-                  '{0:>9s}   {1:s}%'.format(ALL_RESULT[i][3], ALL_RESULT[i][4]) + color_end
+                  '{0:s}\t  '.format(ALL_RESULT[i]['id']) + \
+                  '{0:>9s}'  .format(ALL_RESULT[i]['price']) + \
+                  '{0:>9s}   {1:s}%'.format(ALL_RESULT[i]['change'], ALL_RESULT[i]['ratio']) + color_end
 
         elif type == 'index':
             if i == 0:
@@ -152,12 +151,12 @@ def print_result(show_simple, auto_update):
 
             # print all data
             print item_color + ' ' + \
-                  '{0:8s}'.format(ALL_RESULT[i][0]) + \
-                  '{0:<10s}'.format(ALL_RESULT[i][1]) + \
-                  '{0:>13s}'.format(ALL_RESULT[i][2]) + ' ' + \
-                  '{0:>11s}'.format(ALL_RESULT[i][3]) + ' ' + \
-                  '{0:>9s}%'.format(ALL_RESULT[i][4]) + ' ' + \
-                  '{0:>19s}'.format(ALL_RESULT[i][7]) + color_end
+                  '{0:8s}'  .format(ALL_RESULT[i]['id']) + \
+                  '{0:<10s}'.format(ALL_RESULT[i]['name']) + \
+                  '{0:>13s}'.format(ALL_RESULT[i]['price']) + ' ' + \
+                  '{0:>11s}'.format(ALL_RESULT[i]['change']) + ' ' + \
+                  '{0:>9s}%'.format(ALL_RESULT[i]['ratio']) + ' ' + \
+                  '{0:>19s}'.format(ALL_RESULT[i]['time']) + color_end
 
         elif type == 'stock':
             if (i == 0 or last_type != 'stock'):
@@ -166,13 +165,12 @@ def print_result(show_simple, auto_update):
 
             # print all data
             print item_color + ' ' + \
-                  '{0:s}'.format(ALL_RESULT[i][0]) + '\t ' + \
-                  ALL_RESULT[i][1] + '\t' + \
-                  '{0:>9s}'.format(ALL_RESULT[i][2]) + ' ' + \
-                  '{0:>8s}'.format(ALL_RESULT[i][3]) + ' ' + \
-                  '{0:>8s}%'.format(ALL_RESULT[i][4]) + ' ' + \
-                  '{0:>8s}'.format(ALL_RESULT[i][5]) + ' ' + \
-                  '{0:>19s}'.format(ALL_RESULT[i][7]) + color_end
+                  '{0:s}'   .format(ALL_RESULT[i]['id']) + '\t ' + ALL_RESULT[i]['name'] + '\t' + \
+                  '{0:>9s}' .format(ALL_RESULT[i]['price']) + ' ' + \
+                  '{0:>8s}' .format(ALL_RESULT[i]['change']) + ' ' + \
+                  '{0:>8s}%'.format(ALL_RESULT[i]['ratio']) + ' ' + \
+                  '{0:>8s}' .format(ALL_RESULT[i]['volume']) + ' ' + \
+                  '{0:>19s}'.format(ALL_RESULT[i]['time']) + color_end
 
     if show_simple == False:
         if auto_update:
@@ -191,16 +189,16 @@ def get_tw_future():
         price   = float(future.data[6].replace(',',''))
         change  = float(future.data[7])
         volume  = future.data[9].replace(',','')
-        timestr = future.data[14] + ' (close)'
+        time_str = future.data[14] + ' (close)'
         last_day_price = float(future.data[13].replace(',',''))
-        ratio = '{0:.02f}'.format(change / last_day_price * 100)
+        ratio   = '{0:.02f}'.format(change / last_day_price * 100)
     else:
-        price = float(future.data[5].replace(',',''))
-        change = float(future.data[6])
-        volume = future.data[8].replace(',','')
-        timestr = future.data[13] + '        '
+        price   = float(future.data[5].replace(',',''))
+        change  = float(future.data[6])
+        volume  = future.data[8].replace(',','')
+        time_str = future.data[13] + '        '
         last_day_price = float(future.data[12].replace(',',''))
-        ratio = '{0:.02f}'.format(change / last_day_price * 100)
+        ratio   = '{0:.02f}'.format(change / last_day_price * 100)
 
     if change > 0:
         sign = '+'
@@ -210,15 +208,15 @@ def get_tw_future():
     change_str = sign + '{0:.0f} '.format(change)
     ratio_str = sign + ratio
 
-    result = []
-    result.append('WTX')
-    result.append('台指期')
-    result.append('{0:.0f} '.format(price))
-    result.append(change_str)
-    result.append(ratio_str)
-    result.append(volume)
-    result.append('stock')
-    result.append(timestr)
+    result = {'id':'', 'name':'', 'price':'', 'change':'', 'ratio':'', 'volume':'', 'time': '', 'type':''}
+    result['id']     = 'WTX'
+    result['name']   = '台指期'
+    result['price']  = '{0:.0f} '.format(price)
+    result['change'] = change_str
+    result['ratio']  = ratio_str
+    result['volume'] = volume
+    result['time']   = time_str
+    result['type']   = 'stock'
     ALL_RESULT.append(result)
 
 
@@ -247,20 +245,20 @@ def add_result_to_list(json_str, stock_type):
             else:
                 time_str = str(result_time.strftime('%H:%M:%S (%m/%d)'))
 
-            result.append(id)
-            result.append(INDEX_LIST[i][3])
-            result.append(j["l"].replace(',',''))
-            result.append(j["c"])
-            result.append(ratio)
-            result.append(' ')
-            result.append("index")
-            result.append(time_str)
+            result = {'id':'', 'name':'', 'price':'', 'change':'', 'ratio':'', 'volume':'', 'time': '', 'type':''}
+            result['id']     = id
+            result['name']   = INDEX_LIST[i][3]
+            result['price']  = j["l"].replace(',','')
+            result['change'] = j["c"]
+            result['ratio']  = ratio
+            result['volume'] = ' '
+            result['time']   = time_str
+            result['type']   = 'index'
             ALL_RESULT.append(result)
 
     elif stock_type == 'tw':
         # FIXME: console sometimes show "KeyError: 'msgArray'"
         for i in range(len(json_data['msgArray'])):
-            result = []
             j = json_data['msgArray'][i]
             price = j["z"]
             diff = float(j["z"]) - float(j["y"])
@@ -304,14 +302,15 @@ def add_result_to_list(json_str, stock_type):
             else:
                 time_str = j["t"] + date.strftime(' (%m/%d)')
 
-            result.append(stock_no)
-            result.append(name)
-            result.append(price)
-            result.append(change_str)
-            result.append(change_str_p)
-            result.append(volume)
-            result.append("stock")
-            result.append(time_str)
+            result = {'id':'', 'name':'', 'price':'', 'change':'', 'ratio':'', 'volume':'', 'time': '', 'type':''}
+            result['id']     = stock_no
+            result['name']   = name
+            result['price']  = price
+            result['change'] = change_str
+            result['ratio']  = change_str_p
+            result['volume'] = volume
+            result['time']   = time_str
+            result['type']   = 'stock'
             ALL_RESULT.append(result)
 
 
