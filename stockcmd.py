@@ -22,7 +22,8 @@ ADD_USER_STOCK_LIST = False
 AUTO_UPDATE_SECOND = 20
 
 # User Setting2: Stock list and file path
-TW_STOCK_LIST = ['2330', '2317', '3008', '00631L', '00632R']
+USER_STOCK_LIST = ['2330', '2317', '3008', '00631L', '00632R']
+TW_STOCK_QUERY_LIST = []
 TSE_FILE = 'tse.csv'
 OTC_FILE = 'otc.csv'
 
@@ -97,15 +98,25 @@ class future_parser(HTMLParser):
                 self.data.append(data)
 
 
-def search_stock(stock_no, filename):
-    ret = False
-    f = open(filename,'r')
+def search_stock(stock_no):
+    stock_str = ''
+
+    f = open(TSE_FILE,'r')
     for row in csv.reader(f):
         if row[0] == str(stock_no):
-            ret = True
+            stock_str = 'tse_' + stock_no + '.tw|'
             break
     f.close()
-    return ret
+
+    if len(stock_str) == 0:
+        f = open(OTC_FILE,'r')
+        for row in csv.reader(f):
+            if row[0] == str(stock_no):
+                stock_str = 'otc_' + stock_no + '.tw|'
+                break
+        f.close()
+
+    return stock_str
 
 
 def remove_special_char(string):
@@ -314,28 +325,39 @@ def add_result_to_list(json_str, stock_type):
             ALL_RESULT.append(result)
 
 
-def create_tw_stock_url(add_twse, add_stock_list, argv):
+def add_tw_stock_to_query_list(stock_no):
+    global TW_STOCK_QUERY_LIST
+
+    for i in TW_STOCK_QUERY_LIST:
+        if i == stock_no:
+            return
+
+    TW_STOCK_QUERY_LIST.append(stock_no)
+
+
+def create_tw_query_list(add_stock_list, argv):
+    global TW_STOCK_QUERY_LIST
+    TW_STOCK_QUERY_LIST = []
+
+    # add stocks in argv to stock list
+    for i in argv:
+        if i[:1] == '-':
+            continue;
+        USER_STOCK_LIST.append(i)
+
+    # add stock list to query list
+    if add_stock_list:
+        for i in USER_STOCK_LIST:
+            add_tw_stock_to_query_list(str(i).upper())
+
+
+def create_tw_stock_url(add_twse):
     url = TWSE_URL
     if add_twse:
         url = url + 'tse_t00.tw|otc_o00.tw|'
 
-    # add user predefined stock list
-    # search_stock() is use to determine stock is in tse or otc
-    if add_stock_list:
-        for i in TW_STOCK_LIST:
-            stock_no = str(i).upper()
-            if search_stock(stock_no, OTC_FILE):
-                url = url + 'otc_' + stock_no + '.tw|'
-            elif search_stock(stock_no, TSE_FILE):
-                url = url + 'tse_' + stock_no + '.tw|'
-
-    # search stock number from input
-    for i in argv:
-        stock_no = str(i).upper()
-        if search_stock(stock_no, OTC_FILE):
-            url = url + 'otc_' + stock_no + '.tw|'
-        elif search_stock(stock_no, TSE_FILE):
-            url = url + 'tse_' + stock_no + '.tw|'
+    for i in TW_STOCK_QUERY_LIST:
+        url = url + search_stock(i)
 
     return url
 
@@ -424,7 +446,8 @@ def main():
         add_stock_list = True
 
     # generate query url
-    tw_url = create_tw_stock_url(add_twse, add_stock_list, argv)
+    create_tw_query_list(add_stock_list, argv)
+    tw_url = create_tw_stock_url(add_twse)
     world_url = create_world_index_url()
 
     # show usage() if there is no index or stock
@@ -454,30 +477,46 @@ def main():
         # receive input command to do something
         if not hidden_help:
             print 'Commands: Q->Exit, C->Color, S->Simple, I->TWSE, W->World, U->User\'s List'
+            print '          +-[stock] -> add or remove stock'
 
         for x in range(1, AUTO_UPDATE_SECOND, 1):
             input_cmd = ''
             i, o, e = select.select([sys.stdin], [], [], 1)
             if not i:
                 continue
-            input = sys.stdin.readline().strip().lower()
-            if input == 'q':
+            input = sys.stdin.readline().strip().upper()
+            if input == 'Q':
                 exit()
-            elif input == 'c':
+            elif input == 'C':
                 color_print = not color_print
-            elif input == 's':
+            elif input == 'S':
                 show_simple = not show_simple
-            elif input == 'i':
+            elif input == 'I':
                 add_twse = not add_twse
-            elif input == 'w':
+            elif input == 'W':
                 add_world = not add_world
-            elif input == 'u':
+            elif input == 'U':
                 add_stock_list = not add_stock_list
-            elif input == 'h':
+            elif input == 'H':
                 hidden_help = not hidden_help
+            elif input[:1] == '+' and len(input) > 1:
+                append_stock = True
+                for i in USER_STOCK_LIST:
+                    if i == input[1:]:
+                           append_stock = False;
+                if append_stock:
+                    USER_STOCK_LIST.append(input[1:])
 
-            tw_url = create_tw_stock_url(add_twse, add_stock_list, argv)
-            break;
+            elif input[:1] == '-' and len(input) > 1:
+                for i in USER_STOCK_LIST:
+                    if i == input[1:]:
+                        USER_STOCK_LIST.remove(i)
+                        break
+
+            # update taiwan stock query list
+            create_tw_query_list(add_stock_list, '')
+            tw_url = create_tw_stock_url(add_twse)
+            break
 
 if __name__ == '__main__':
     main()
