@@ -323,19 +323,21 @@ def create_tw_stock_url(add_twse, add_stock_list, argv):
     # search_stock() is use to determine stock is in tse or otc
     if add_stock_list:
         for i in TW_STOCK_LIST:
-            if search_stock(str(i), OTC_FILE):
-                url = url + 'otc_' + str(i) + '.tw|'
-            elif search_stock(str(i), TSE_FILE):
-                url = url + 'tse_' + str(i) + '.tw|'
+            stock_no = str(i).upper()
+            if search_stock(stock_no, OTC_FILE):
+                url = url + 'otc_' + stock_no + '.tw|'
+            elif search_stock(stock_no, TSE_FILE):
+                url = url + 'tse_' + stock_no + '.tw|'
 
     # search stock number from input
     for i in argv:
-        if search_stock(str(i), OTC_FILE):
-            url = url + 'otc_' + str(i) + '.tw|'
-        elif search_stock(str(i), TSE_FILE):
-            url = url + 'tse_' + str(i) + '.tw|'
+        stock_no = str(i).upper()
+        if search_stock(stock_no, OTC_FILE):
+            url = url + 'otc_' + stock_no + '.tw|'
+        elif search_stock(stock_no, TSE_FILE):
+            url = url + 'tse_' + stock_no + '.tw|'
 
-    return url;
+    return url
 
 
 def create_world_index_url():
