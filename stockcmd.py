@@ -37,6 +37,7 @@ INDEX_LIST = [['TPE:TAIEX'        , 'TAIEX' , +8, '加權指數'], # Format: goo
               ['INDEXNASDAQ:SOX'  , 'PHLX'  , -4, '費半PHLX'],
               ['INDEXDB:DAX'      , 'DAX'   , +2, '德國DAX'],
               ['INDEXFTSE:UKX'    , 'FTSE'  , +1, '英國FTSE'],
+              ['INDEXEURO:PX1'    , 'CAC40' , +2, '法國指數'],
               ['INDEXNIKKEI:NI225', 'N225'  , +9, '日本指數'],
               ['KRX:KOSPI'        , 'KOSPI' , +9, '韓國指數'],
               ['SHA:000001'       , 'SHCOMP', +8, '上證指數'],
