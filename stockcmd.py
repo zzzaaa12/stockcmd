@@ -124,7 +124,7 @@ def remove_special_char(string):
     return re.sub(r'[^\x00-\x7F]','', string)
 
 
-def print_result(show_simple, auto_update):
+def print_result(show_simple, auto_update, hide_closed_index):
 
     if auto_update:
         os.system('clear || cls')
@@ -162,6 +162,8 @@ def print_result(show_simple, auto_update):
                 print '---------------------------------------------------------------------------'
 
             # print all data
+            if hide_closed_index == True and ALL_RESULT[i]['time'].find('(') != -1:
+                continue;
             print item_color + ' ' + \
                   '{0:8s}'  .format(ALL_RESULT[i]['id']) + \
                   '{0:<10s}'.format(ALL_RESULT[i]['name']) + \
@@ -398,6 +400,7 @@ def main():
     show_simple = False
     auto_update = False
     hidden_help = False
+    hide_closed_index = False
     global color_print
 
     if len(argv) == 1 and \
@@ -468,7 +471,7 @@ def main():
         if tw_url != TWSE_URL:
             get_tw_stock_info(tw_url)
 
-        print_result(show_simple, auto_update);
+        print_result(show_simple, auto_update, hide_closed_index);
 
         if auto_update == False:
             break
@@ -478,7 +481,7 @@ def main():
         # receive input command to do something
         if not hidden_help:
             print 'Commands: Q->Exit, C->Color, S->Simple, I->TWSE, W->World, U->User\'s List'
-            print '          +-[stock] -> add or remove stock'
+            print '          X->Hide closed index,  +-[stock] -> add or remove stock'
 
         for x in range(1, AUTO_UPDATE_SECOND, 1):
             input_cmd = ''
@@ -500,6 +503,8 @@ def main():
                 add_stock_list = not add_stock_list
             elif input == 'H':
                 hidden_help = not hidden_help
+            elif input == 'X':
+                hide_closed_index = not hide_closed_index
             elif input[:1] == '+' and len(input) > 1:
                 append_stock = True
                 for i in USER_STOCK_LIST:
