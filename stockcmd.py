@@ -129,6 +129,13 @@ def print_result(show_simple, auto_update, hide_closed_index):
     if auto_update:
         os.system('clear || cls')
 
+    # when all index need be hidden, we will hide the titles
+    index_count = 0;
+    if hide_closed_index:
+        for i in range(len(ALL_RESULT)):
+            if ALL_RESULT[i]['type'] == 'index' and ALL_RESULT[i]['time'].find('(') == -1:
+                index_count = index_count + 1
+
     for i in range(len(ALL_RESULT)):
         type = ALL_RESULT[i]['type']
         last_type = ALL_RESULT[i-1]['type']
@@ -157,13 +164,14 @@ def print_result(show_simple, auto_update, hide_closed_index):
                   '{0:>9s}   {1:s}%'.format(ALL_RESULT[i]['change'], ALL_RESULT[i]['ratio']) + color_end
 
         elif type == 'index':
-            if i == 0:
+            if i == 0 and (not hide_closed_index or (hide_closed_index and index_count > 0)):
                 print '\n' + title_color + ' 代號      指數          點數         漲跌     百分比    資料時間' + color_end
                 print '---------------------------------------------------------------------------'
 
             # print all data
             if hide_closed_index == True and ALL_RESULT[i]['time'].find('(') != -1:
                 continue;
+
             print item_color + ' ' + \
                   '{0:8s}'  .format(ALL_RESULT[i]['id']) + \
                   '{0:<10s}'.format(ALL_RESULT[i]['name']) + \
