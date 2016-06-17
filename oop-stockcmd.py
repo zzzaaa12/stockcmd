@@ -4,8 +4,75 @@ import sys
 import csv
 import json
 import requests
+import urllib
 from datetime import datetime
 from datetime import timedelta
+from HTMLParser import HTMLParser
+
+class taiwan_future(HTMLParser):
+    def __init__(self):
+        HTMLParser.__init__(self)
+        self.data = []
+        self.item_limit = 15
+        self.item_index = 0
+
+
+    def handle_starttag(self, tag, attrs):
+        if tag == 'td':
+            for attr in attrs:
+                if attr[1] == 'bu13':
+                    self.item_index = self.item_index + 1
+                    break
+
+
+    def handle_data(self, data):
+        if self.item_index == 3 or self.item_index == 4:
+            if self.item_limit and len(data) < 14:
+                self.item_limit = self.item_limit - 1
+                self.data.append(data)
+
+
+    def read_data(self):
+        if (self.data[1] == '收盤'):
+            price   = float(self.data[6].replace(',',''))
+            change  = float(self.data[7])
+            volume  = self.data[9].replace(',','')
+            time_str = self.data[14] + ' (close)'
+            last_day_price = float(self.data[13].replace(',',''))
+            ratio   = '{0:.02f}'.format(change / last_day_price * 100)
+        else:
+            price   = float(self.data[5].replace(',',''))
+            change  = float(self.data[6])
+            volume  = self.data[8].replace(',','')
+            time_str = self.data[13] + '        '
+            last_day_price = float(self.data[12].replace(',',''))
+            ratio   = '{0:.02f}'.format(change / last_day_price * 100)
+
+        if change > 0:
+            sign = '+'
+        else:
+            sign = ''
+
+        change_str = sign + '{0:.0f} '.format(change)
+        ratio_str = sign + ratio
+
+        result = {'id':'', 'name':'', 'price':'', 'change':'', 'ratio':'', 'volume':'', 'time': '', 'type':''}
+        result['id']     = 'WTX'
+        result['name']   = '台指期'
+        result['price']  = '{0:.0f} '.format(price)
+        result['change'] = change_str
+        result['ratio']  = ratio_str
+        result['volume'] = volume
+        result['time']   = time_str
+        result['type']   = 'stock'
+        return result
+
+
+    def get_data(self):
+        self.feed(urllib.urlopen("http://info512.taifex.com.tw/Future/FusaQuote_Norl.aspx").read())
+        self.close()
+        return self.read_data()
+
 
 class taiwan_stock:
     def __init__(self):
@@ -143,7 +210,13 @@ class taiwan_stock:
                   '{0:>19s}'.format(stock['time'])
 
 
+    def add_tw_future(self):
+        tw_future = taiwan_future()
+        self.data.append(tw_future.get_data())
+
+
     def run(self):
+        self.add_tw_future()
         self.create_stock_list()
         self.create_query_url()
         self.query_stock_info()
