@@ -260,19 +260,16 @@ class taiwan_future(HTMLParser):
 
     def read_data(self):
         if (self.data[1] == '收盤'):
-            price   = float(self.data[6].replace(',',''))
-            change  = float(self.data[7])
-            volume  = self.data[9].replace(',','')
-            time_str = self.data[14] + ' (close)'
-            last_day_price = float(self.data[13].replace(',',''))
-            ratio   = '{0:.02f}'.format(change / last_day_price * 100)
+            i = 6
         else:
-            price   = float(self.data[5].replace(',',''))
-            change  = float(self.data[6])
-            volume  = self.data[8].replace(',','')
-            time_str = self.data[13] + '        '
-            last_day_price = float(self.data[12].replace(',',''))
-            ratio   = '{0:.02f}'.format(change / last_day_price * 100)
+            i = 5
+
+        price   = float(self.data[i].replace(',',''))
+        change  = float(self.data[i+1])
+        volume  = self.data[i+3].replace(',','')
+        time_str = self.data[i+8] + ' (close)'
+        last_day_price = float(self.data[i+7].replace(',',''))
+        ratio   = '{0:.02f}'.format(change / last_day_price * 100)
 
         if change > 0:
             sign = '+'
@@ -281,7 +278,6 @@ class taiwan_future(HTMLParser):
 
         change_str = sign + '{0:.0f} '.format(change)
         ratio_str = sign + ratio
-
         result = {'id':'', 'name':'', 'price':'', 'change':'', 'ratio':'', 'volume':'', 'time': '', 'type':''}
         result['id']     = 'WTX'
         result['name']   = '台指期'
