@@ -10,6 +10,12 @@ from datetime import datetime
 from datetime import timedelta
 from HTMLParser import HTMLParser
 
+# TODO:
+#   - monitor mode        ( )
+#   - cmd of monitor mode ( )
+#   - colorful print      ( )
+#   - limit up/down print ( )
+
 class world_index:
     def __init__(self):
         self.google_url = 'http://www.google.com/finance/info?q='
