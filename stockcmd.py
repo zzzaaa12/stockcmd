@@ -31,17 +31,17 @@ OTC_FILE = 'otc.csv'
 TWSE_SERVER = '220.229.103.179'
 TWSE_URL = 'http://' + TWSE_SERVER + '/stock/api/getStockInfo.jsp?ex_ch='
 GOOGLE_URL = 'http://www.google.com/finance/info?q='
-INDEX_LIST = [['TPE:TAIEX'        , 'TAIEX' , +8, '加權指數'], # Format: google finance id, nickname, timezone, name
-              ['INDEXDJX:.DJI'    , 'DOW'   , -4, '道瓊指數'], # FIXME: Daylight saving time
-              ['INDEXNASDAQ:.IXIC', 'NASDAQ', -4, '那斯達克'],
-              ['INDEXNASDAQ:SOX'  , 'PHLX'  , -4, '費半PHLX'],
-              ['INDEXDB:DAX'      , 'DAX'   , +2, '德國DAX'],
-              ['INDEXFTSE:UKX'    , 'FTSE'  , +1, '英國FTSE'],
-              ['INDEXEURO:PX1'    , 'CAC40' , +2, '法國指數'],
-              ['INDEXNIKKEI:NI225', 'N225'  , +9, '日本指數'],
-              ['KRX:KOSPI'        , 'KOSPI' , +9, '韓國指數'],
-              ['SHA:000001'       , 'SHCOMP', +8, '上證指數'],
-              ['INDEXHANGSENG:HSI', 'HK'    , +8, '香港恆生']]
+INDEX_LIST = [['TPE:TAIEX'        , 'TAIEX' , '加權指數'], # Format: google finance id, short id, name
+              ['INDEXDJX:.DJI'    , 'DOW'   , '道瓊指數'],
+              ['INDEXNASDAQ:.IXIC', 'NASDAQ', '那斯達克'],
+              ['INDEXNASDAQ:SOX'  , 'PHLX'  , '費半PHLX'],
+              ['INDEXDB:DAX'      , 'DAX'   , '德國DAX'],
+              ['INDEXFTSE:UKX'    , 'FTSE'  , '英國FTSE'],
+              ['INDEXEURO:PX1'    , 'CAC40' , '法國指數'],
+              ['INDEXNIKKEI:NI225', 'N225'  , '日本指數'],
+              ['KRX:KOSPI'        , 'KOSPI' , '韓國指數'],
+              ['SHA:000001'       , 'SHCOMP', '上證指數'],
+              ['INDEXHANGSENG:HSI', 'HK'    , '香港恆生']]
 
 # ALL_RESULT includes all result data we need: [id, name, price, changes, percent, volume, time, type]
 #   ex: ['00632R', 'T50反1', '19.75', '-0.15', '-0.75%', '88403', '13:30:00 (05/20)']
@@ -242,6 +242,15 @@ def get_tw_future():
     ALL_RESULT.append(result)
 
 
+def timezone_diff(timezone):
+    if timezone[:3] == 'GMT':
+        return 8 - int(timezone[3:])
+    elif timezone[:3] == 'EDT':
+        return 8 - (-4)
+    else:
+        print 'unknown timezone: ' + timezone
+        return 0
+
 def add_result_to_list(json_str, stock_type):
     # read json data
     json_data = json.loads(json_str)
@@ -257,8 +266,7 @@ def add_result_to_list(json_str, stock_type):
             if ratio.find('-'):
                 ratio = '+' + ratio
 
-            timezone = int(INDEX_LIST[i][2])
-            result_time = datetime.strptime(j["lt_dts"], '%Y-%m-%dT%H:%M:%SZ') + timedelta(hours = 8-timezone)
+            result_time = datetime.strptime(j["lt_dts"], '%Y-%m-%dT%H:%M:%SZ') + timedelta(hours = timezone_diff(j['lt'][15:]))
 
             if (now-result_time).total_seconds() < 1800:
                 time_str = str(result_time.strftime('%H:%M:%S        '))
@@ -269,7 +277,7 @@ def add_result_to_list(json_str, stock_type):
 
             result = {'id':'', 'name':'', 'price':'', 'change':'', 'ratio':'', 'volume':'', 'time': '', 'type':''}
             result['id']     = id
-            result['name']   = INDEX_LIST[i][3]
+            result['name']   = INDEX_LIST[i][2]
             result['price']  = j["l"].replace(',','')
             result['change'] = j["c"]
             result['ratio']  = ratio
