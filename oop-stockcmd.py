@@ -13,17 +13,17 @@ from HTMLParser import HTMLParser
 class world_index:
     def __init__(self):
         self.google_url = 'http://www.google.com/finance/info?q='
-        self.index_list = [['TPE:TAIEX'        , 'TAIEX' , +8, '加權指數'], # Format: google finance id, nickname, timezone, name
-                           ['INDEXDJX:.DJI'    , 'DOW'   , -4, '道瓊指數'], # FIXME: Daylight saving time
-                           ['INDEXNASDAQ:.IXIC', 'NASDAQ', -4, '那斯達克'],
-                           ['INDEXNASDAQ:SOX'  , 'PHLX'  , -4, '費半PHLX'],
-                           ['INDEXDB:DAX'      , 'DAX'   , +2, '德國DAX'],
-                           ['INDEXFTSE:UKX'    , 'FTSE'  , +1, '英國FTSE'],
-                           ['INDEXEURO:PX1'    , 'CAC40' , +2, '法國指數'],
-                           ['INDEXNIKKEI:NI225', 'N225'  , +9, '日本指數'],
-                           ['KRX:KOSPI'        , 'KOSPI' , +9, '韓國指數'],
-                           ['SHA:000001'       , 'SHCOMP', +8, '上證指數'],
-                           ['INDEXHANGSENG:HSI', 'HK'    , +8, '香港恆生']]
+        self.index_list = [['TPE:TAIEX'        , 'TAIEX' , '加權指數'], # Format: google finance id, nickname, timezone, name
+                           ['INDEXDJX:.DJI'    , 'DOW'   , '道瓊指數'], # FIXME: Daylight saving time
+                           ['INDEXNASDAQ:.IXIC', 'NASDAQ', '那斯達克'],
+                           ['INDEXNASDAQ:SOX'  , 'PHLX'  , '費半PHLX'],
+                           ['INDEXDB:DAX'      , 'DAX'   , '德國DAX'],
+                           ['INDEXFTSE:UKX'    , 'FTSE'  , '英國FTSE'],
+                           ['INDEXEURO:PX1'    , 'CAC40' , '法國指數'],
+                           ['INDEXNIKKEI:NI225', 'N225'  , '日本指數'],
+                           ['KRX:KOSPI'        , 'KOSPI' , '韓國指數'],
+                           ['SHA:000001'       , 'SHCOMP', '上證指數'],
+                           ['INDEXHANGSENG:HSI', 'HK'    , '香港恆生']]
         self.json_data = ''
         self.query_url = ''
         self.data = []
@@ -51,9 +51,7 @@ class world_index:
             if ratio.find('-'):
                 ratio = '+' + ratio
 
-            timezone = int(self.index_list[i][2])
-            result_time = datetime.strptime(j["lt_dts"], '%Y-%m-%dT%H:%M:%SZ') + timedelta(hours = 8-timezone)
-
+            result_time = datetime.strptime(j["lt_dts"], '%Y-%m-%dT%H:%M:%SZ') + timedelta(hours = timezone_diff(j['lt'][15:]))
             if (now-result_time).total_seconds() < 1800:
                 time_str = str(result_time.strftime('%H:%M:%S        '))
             elif now.month == result_time.month and now.day == result_time.day:
@@ -63,7 +61,7 @@ class world_index:
 
             result = {'id':'', 'name':'', 'price':'', 'change':'', 'ratio':'', 'volume':'', 'time': '', 'type':''}
             result['id']     = id
-            result['name']   = self.index_list[i][3]
+            result['name']   = self.index_list[i][2]
             result['price']  = j["l"].replace(',','')
             result['change'] = j["c"]
             result['ratio']  = ratio
@@ -71,6 +69,15 @@ class world_index:
             result['time']   = time_str
             result['type']   = 'index'
             self.data.append(result)
+
+    def timezone_diff(self, timezone):
+        if timezone[:3] == 'GMT':
+            return 8 - int(timezone[3:])
+        elif timezone[:3] == 'EDT':
+            return -4
+        else
+            print 'unknown timezone: ' + timezone
+            return 0
 
     def print_stock_info(self):
         print ' 代號      指數          點數         漲跌     百分比    資料時間' 
