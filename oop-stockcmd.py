@@ -11,10 +11,11 @@ from datetime import timedelta
 from HTMLParser import HTMLParser
 
 # TODO:
-#   - monitor mode        ( )
-#   - cmd of monitor mode ( )
-#   - colorful print      ( )
-#   - limit up/down print ( )
+#      ( ) monitor mode
+#      ( ) cmd of monitor mode
+#      ( ) colorful print
+#      ( ) important status change
+#      ( ) limit up/down print
 
 class world_index:
     def __init__(self):
@@ -65,15 +66,13 @@ class world_index:
             else:
                 time_str = str(result_time.strftime('%H:%M:%S (%m/%d)'))
 
-            result = {'id':'', 'name':'', 'price':'', 'change':'', 'ratio':'', 'volume':'', 'time': '', 'type':''}
+            result = {'id':'', 'name':'', 'price':'', 'change':'', 'ratio':'', 'time': ''}
             result['id']     = id
             result['name']   = self.index_list[i][2]
             result['price']  = j["l"].replace(',','')
             result['change'] = j["c"]
             result['ratio']  = ratio
-            result['volume'] = ' '
             result['time']   = time_str
-            result['type']   = 'index'
             self.data.append(result)
 
     def timezone_diff(self, timezone):
@@ -214,7 +213,7 @@ class taiwan_stock:
                 time_str = j["t"] + date.strftime(' (%m/%d)')
 
             # save to self.data
-            result = {'id':'', 'name':'', 'price':'', 'change':'', 'ratio':'', 'volume':'', 'time': '', 'type':''}
+            result = {'id':'', 'name':'', 'price':'', 'change':'', 'ratio':'', 'volume':'', 'time': ''}
             result['id']     = stock_no
             result['name']   = name
             result['price']  = price
@@ -222,7 +221,6 @@ class taiwan_stock:
             result['ratio']  = change_str_p
             result['volume'] = volume
             result['time']   = time_str
-            result['type']   = 'stock'
             self.data.append(result)
 
     def print_stock_info(self):
@@ -291,7 +289,7 @@ class taiwan_future(HTMLParser):
 
         change_str = sign + '{0:.0f} '.format(change)
         ratio_str = sign + ratio
-        result = {'id':'', 'name':'', 'price':'', 'change':'', 'ratio':'', 'volume':'', 'time': '', 'type':''}
+        result = {'id':'', 'name':'', 'price':'', 'change':'', 'ratio':'', 'volume':'', 'time': ''}
         result['id']     = 'WTX'
         result['name']   = '台指期'
         result['price']  = '{0:.0f} '.format(price)
@@ -299,7 +297,6 @@ class taiwan_future(HTMLParser):
         result['ratio']  = ratio_str
         result['volume'] = volume
         result['time']   = time_str
-        result['type']   = 'stock'
         return result
 
     def get_data(self):
