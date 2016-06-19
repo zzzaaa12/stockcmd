@@ -51,7 +51,7 @@ class world_index:
             if ratio.find('-'):
                 ratio = '+' + ratio
 
-            result_time = datetime.strptime(j["lt_dts"], '%Y-%m-%dT%H:%M:%SZ') + timedelta(hours = timezone_diff(j['lt'][15:]))
+            result_time = datetime.strptime(j["lt_dts"], '%Y-%m-%dT%H:%M:%SZ') + timedelta(hours = self.timezone_diff(j['lt'][15:]))
             if (now-result_time).total_seconds() < 1800:
                 time_str = str(result_time.strftime('%H:%M:%S        '))
             elif now.month == result_time.month and now.day == result_time.day:
@@ -74,8 +74,8 @@ class world_index:
         if timezone[:3] == 'GMT':
             return 8 - int(timezone[3:])
         elif timezone[:3] == 'EDT':
-            return -4
-        else
+            return 8 - (-4)
+        else:
             print 'unknown timezone: ' + timezone
             return 0
 
