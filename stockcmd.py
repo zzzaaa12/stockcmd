@@ -243,9 +243,10 @@ def get_tw_future():
 
 
 def timezone_diff(timezone):
+    timezone = timezone.replace(' ', '')
     if timezone[:3] == 'GMT':
         return 8 - int(timezone[3:])
-    elif timezone.find('EDT') != -1:
+    elif timezone[:3] == 'EDT':
         return 8 - (-4)
     else:
         print 'unknown timezone: ' + timezone
