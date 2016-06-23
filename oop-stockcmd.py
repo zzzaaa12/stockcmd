@@ -76,6 +76,7 @@ class world_index:
             self.data.append(result)
 
     def timezone_diff(self, timezone):
+        timezone = timezone.replace(' ', '')
         if timezone[:3] == 'GMT':
             return 8 - int(timezone[3:])
         elif timezone[:3] == 'EDT':
@@ -272,13 +273,14 @@ class taiwan_future(HTMLParser):
     def read_data(self):
         if (self.data[1] == '收盤'):
             i = 6
+            time_str = self.data[i+8] + ' (close)'
         else:
             i = 5
+            time_str = self.data[i+8] + '        '
 
         price   = float(self.data[i].replace(',',''))
         change  = float(self.data[i+1])
         volume  = self.data[i+3].replace(',','')
-        time_str = self.data[i+8] + ' (close)'
         last_day_price = float(self.data[i+7].replace(',',''))
         ratio   = '{0:.02f}'.format(change / last_day_price * 100)
 
