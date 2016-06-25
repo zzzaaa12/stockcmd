@@ -147,7 +147,7 @@ def print_result(show_simple, auto_update, hide_closed_index):
         if color_print:
             title_color = YELLOW
             color_end = COLOR_END
-            change = ALL_RESULT[i]['change']
+            change = ALL_RESULT[i]['change'].replace(',','')
             if float(change) > 0:
                 item_color = RED
             elif float(change) < 0:
