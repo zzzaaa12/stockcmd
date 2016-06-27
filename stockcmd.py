@@ -333,6 +333,10 @@ def add_result_to_list(json_str, stock_type):
             else:
                 time_str = j["t"] + date.strftime(' (%m/%d)')
 
+            # FIXME: To avoid stock name too long
+            if len(name) > 4:
+                name = stock_no
+
             result = {'id':'', 'name':'', 'price':'', 'change':'', 'ratio':'', 'volume':'', 'time': '', 'type':''}
             result['id']     = stock_no
             result['name']   = name
