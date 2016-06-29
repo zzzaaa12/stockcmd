@@ -182,8 +182,8 @@ def print_result(show_simple, auto_update, hide_closed_index):
 
         elif type == 'stock':
             if (i == 0 or last_type != 'stock'):
-                print '\n' + title_color + ' 股號     股名     成交價     漲跌    百分比   成交量    資料時間' + color_end
-                print '---------------------------------------------------------------------------'
+                print '\n' + title_color + ' 股號     股名     成交價     漲跌    百分比   成交量    資料時間 & 狀態' + color_end
+                print '---------------------------------------------------------------------------------'
 
             # print all data
             print item_color + ' ' + \
@@ -192,7 +192,7 @@ def print_result(show_simple, auto_update, hide_closed_index):
                   '{0:>8s}' .format(ALL_RESULT[i]['change']) + ' ' + \
                   '{0:>8s}%'.format(ALL_RESULT[i]['ratio']) + ' ' + \
                   '{0:>8s}' .format(ALL_RESULT[i]['volume']) + ' ' + \
-                  '{0:>19s}'.format(ALL_RESULT[i]['time']) + color_end
+                  '   ' + ALL_RESULT[i]['time'] + color_end
 
     if show_simple == False:
         if auto_update:
@@ -214,18 +214,28 @@ def get_tw_future():
         time_str = future.data[14] + ' (close)'
         last_day_price = float(future.data[13].replace(',',''))
         ratio   = '{0:.02f}'.format(change / last_day_price * 100)
+        highest = float(future.data[11].replace(',',''))
+        lowest = float(future.data[12].replace(',',''))
     else:
         price   = float(future.data[5].replace(',',''))
         change  = float(future.data[6])
         volume  = future.data[8].replace(',','')
-        time_str = future.data[13] + '        '
+        time_str = future.data[13]
         last_day_price = float(future.data[12].replace(',',''))
         ratio   = '{0:.02f}'.format(change / last_day_price * 100)
+        highest = float(future.data[10].replace(',',''))
+        lowest = float(future.data[11].replace(',',''))
 
     if change > 0:
         sign = '+'
     else:
         sign = ''
+
+    status = ''
+    if price == highest:
+        status = u' 最高'
+    elif price == lowest:
+        status = u' 最低'
 
     change_str = sign + '{0:.0f} '.format(change)
     ratio_str = sign + ratio
@@ -237,7 +247,7 @@ def get_tw_future():
     result['change'] = change_str
     result['ratio']  = ratio_str
     result['volume'] = volume
-    result['time']   = time_str
+    result['time']   = time_str + status
     result['type']   = 'stock'
     ALL_RESULT.append(result)
 
@@ -290,6 +300,12 @@ def add_result_to_list(json_str, stock_type):
     elif stock_type == 'tw':
         # FIXME: console sometimes show "KeyError: 'msgArray'"
         for i in range(len(json_data['msgArray'])):
+            h_limit = -1
+            l_limit = -1
+            highest = -1
+            lowest = -1
+            status = ''
+
             j = json_data['msgArray'][i]
             price = j["z"]
             diff = float(j["z"]) - float(j["y"])
@@ -308,7 +324,9 @@ def add_result_to_list(json_str, stock_type):
             name = j["n"]
             volume = j["v"]
 
-            # fix too long name.....
+            highest = float(j['h'])
+            lowest = float(j['l'])
+
             if stock_no == 't00':
                 stock_no = 'TWSE'
                 name = u'上市'
@@ -320,6 +338,19 @@ def add_result_to_list(json_str, stock_type):
                 name = u'上櫃'
                 volume = '{0:d}'.format(int(volume)/100)
 
+            if (float(price) == highest):
+                status = u' 最高'
+            elif (float(price) == lowest):
+                status = u' 最低'
+
+            if stock_no != 'TWSE' and stock_no != 'OTC':
+                h_limit = float(j['u'])
+                l_limit = float(j['w'])
+                if (float(price) == h_limit):
+                    status = u' 漲停！'
+                elif (float(price) == l_limit):
+                    status = u' 跌停！'
+
             date = datetime.strptime(j["d"], '%Y%m%d')
 
             result_time_str = j["d"] + ' ' + j["t"]
@@ -329,7 +360,7 @@ def add_result_to_list(json_str, stock_type):
                 if (now.hour > 13) or (now.hour == 13 and now.minute > 30):
                     time_str = j["t"] + ' (today)'
                 else:
-                    time_str = j["t"] + '        '
+                    time_str = j["t"]
             else:
                 time_str = j["t"] + date.strftime(' (%m/%d)')
 
@@ -344,7 +375,7 @@ def add_result_to_list(json_str, stock_type):
             result['change'] = change_str
             result['ratio']  = change_str_p
             result['volume'] = volume
-            result['time']   = time_str
+            result['time']   = time_str + status
             result['type']   = 'stock'
             ALL_RESULT.append(result)
 
