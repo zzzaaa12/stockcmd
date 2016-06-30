@@ -228,6 +228,10 @@ class taiwan_stock:
             else:
                 time_str = j["t"] + date.strftime(' (%m/%d)')
 
+            # FIXME: To avoid too long stock name
+            if len(name) > 4:
+                name = stock_no
+
             # save to self.data
             result = {'id':'', 'name':'', 'price':'', 'change':'', 'ratio':'', 'volume':'', 'time': '', 'status': ''}
             result['id']     = stock_no
