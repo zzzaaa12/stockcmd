@@ -31,17 +31,17 @@ OTC_FILE = 'otc.csv'
 TWSE_SERVER = '220.229.103.179'
 TWSE_URL = 'http://' + TWSE_SERVER + '/stock/api/getStockInfo.jsp?ex_ch='
 GOOGLE_URL = 'http://www.google.com/finance/info?q='
-INDEX_LIST = [['TPE:TAIEX'        , 'TAIEX' , +8, '加權指數'], # Format: google finance id, nickname, timezone, name
-              ['INDEXDJX:.DJI'    , 'DOW'   , -4, '道瓊指數'], # FIXME: Daylight saving time
-              ['INDEXNASDAQ:.IXIC', 'NASDAQ', -4, '那斯達克'],
-              ['INDEXNASDAQ:SOX'  , 'PHLX'  , -4, '費半PHLX'],
-              ['INDEXDB:DAX'      , 'DAX'   , +2, '德國DAX'],
-              ['INDEXFTSE:UKX'    , 'FTSE'  , +1, '英國FTSE'],
-              ['INDEXEURO:PX1'    , 'CAC40' , +2, '法國指數'],
-              ['INDEXNIKKEI:NI225', 'N225'  , +9, '日本指數'],
-              ['KRX:KOSPI'        , 'KOSPI' , +9, '韓國指數'],
-              ['SHA:000001'       , 'SHCOMP', +8, '上證指數'],
-              ['INDEXHANGSENG:HSI', 'HK'    , +8, '香港恆生']]
+INDEX_LIST = [['TPE:TAIEX'        , 'TAIEX' , '加權指數'], # Format: google finance id, short id, name
+              ['INDEXDJX:.DJI'    , 'DOW'   , '道瓊指數'],
+              ['INDEXNASDAQ:.IXIC', 'NASDAQ', '那斯達克'],
+              ['INDEXNASDAQ:SOX'  , 'PHLX'  , '費半PHLX'],
+              ['INDEXDB:DAX'      , 'DAX'   , '德國DAX'],
+              ['INDEXFTSE:UKX'    , 'FTSE'  , '英國FTSE'],
+              ['INDEXEURO:PX1'    , 'CAC40' , '法國指數'],
+              ['INDEXNIKKEI:NI225', 'N225'  , '日本指數'],
+              ['KRX:KOSPI'        , 'KOSPI' , '韓國指數'],
+              ['SHA:000001'       , 'SHCOMP', '上證指數'],
+              ['INDEXHANGSENG:HSI', 'HK'    , '香港恆生']]
 
 # ALL_RESULT includes all result data we need: [id, name, price, changes, percent, volume, time, type]
 #   ex: ['00632R', 'T50反1', '19.75', '-0.15', '-0.75%', '88403', '13:30:00 (05/20)']
@@ -147,7 +147,7 @@ def print_result(show_simple, auto_update, hide_closed_index):
         if color_print:
             title_color = YELLOW
             color_end = COLOR_END
-            change = ALL_RESULT[i]['change']
+            change = ALL_RESULT[i]['change'].replace(',','')
             if float(change) > 0:
                 item_color = RED
             elif float(change) < 0:
@@ -182,8 +182,8 @@ def print_result(show_simple, auto_update, hide_closed_index):
 
         elif type == 'stock':
             if (i == 0 or last_type != 'stock'):
-                print '\n' + title_color + ' 股號     股名     成交價     漲跌    百分比   成交量    資料時間' + color_end
-                print '---------------------------------------------------------------------------'
+                print '\n' + title_color + ' 股號     股名     成交價     漲跌    百分比   成交量    資料時間 & 狀態' + color_end
+                print '---------------------------------------------------------------------------------'
 
             # print all data
             print item_color + ' ' + \
@@ -192,7 +192,7 @@ def print_result(show_simple, auto_update, hide_closed_index):
                   '{0:>8s}' .format(ALL_RESULT[i]['change']) + ' ' + \
                   '{0:>8s}%'.format(ALL_RESULT[i]['ratio']) + ' ' + \
                   '{0:>8s}' .format(ALL_RESULT[i]['volume']) + ' ' + \
-                  '{0:>19s}'.format(ALL_RESULT[i]['time']) + color_end
+                  '   ' + ALL_RESULT[i]['time'] + color_end
 
     if show_simple == False:
         if auto_update:
@@ -214,18 +214,28 @@ def get_tw_future():
         time_str = future.data[14] + ' (close)'
         last_day_price = float(future.data[13].replace(',',''))
         ratio   = '{0:.02f}'.format(change / last_day_price * 100)
+        highest = float(future.data[11].replace(',',''))
+        lowest = float(future.data[12].replace(',',''))
     else:
         price   = float(future.data[5].replace(',',''))
         change  = float(future.data[6])
         volume  = future.data[8].replace(',','')
-        time_str = future.data[13] + '        '
+        time_str = future.data[13]
         last_day_price = float(future.data[12].replace(',',''))
         ratio   = '{0:.02f}'.format(change / last_day_price * 100)
+        highest = float(future.data[10].replace(',',''))
+        lowest = float(future.data[11].replace(',',''))
 
     if change > 0:
         sign = '+'
     else:
         sign = ''
+
+    status = ''
+    if price == highest:
+        status = u' 最高'
+    elif price == lowest:
+        status = u' 最低'
 
     change_str = sign + '{0:.0f} '.format(change)
     ratio_str = sign + ratio
@@ -237,10 +247,20 @@ def get_tw_future():
     result['change'] = change_str
     result['ratio']  = ratio_str
     result['volume'] = volume
-    result['time']   = time_str
+    result['time']   = time_str + status
     result['type']   = 'stock'
     ALL_RESULT.append(result)
 
+
+def timezone_diff(timezone):
+    timezone = timezone.replace(' ', '')
+    if timezone[:3] == 'GMT':
+        return 8 - int(timezone[3:])
+    elif timezone[:3] == 'EDT':
+        return 8 - (-4)
+    else:
+        print 'unknown timezone: ' + timezone
+        return 0
 
 def add_result_to_list(json_str, stock_type):
     # read json data
@@ -257,8 +277,7 @@ def add_result_to_list(json_str, stock_type):
             if ratio.find('-'):
                 ratio = '+' + ratio
 
-            timezone = int(INDEX_LIST[i][2])
-            result_time = datetime.strptime(j["lt_dts"], '%Y-%m-%dT%H:%M:%SZ') + timedelta(hours = 8-timezone)
+            result_time = datetime.strptime(j["lt_dts"], '%Y-%m-%dT%H:%M:%SZ') + timedelta(hours = timezone_diff(j['lt'][15:]))
 
             if (now-result_time).total_seconds() < 1800:
                 time_str = str(result_time.strftime('%H:%M:%S        '))
@@ -269,7 +288,7 @@ def add_result_to_list(json_str, stock_type):
 
             result = {'id':'', 'name':'', 'price':'', 'change':'', 'ratio':'', 'volume':'', 'time': '', 'type':''}
             result['id']     = id
-            result['name']   = INDEX_LIST[i][3]
+            result['name']   = INDEX_LIST[i][2]
             result['price']  = j["l"].replace(',','')
             result['change'] = j["c"]
             result['ratio']  = ratio
@@ -281,6 +300,12 @@ def add_result_to_list(json_str, stock_type):
     elif stock_type == 'tw':
         # FIXME: console sometimes show "KeyError: 'msgArray'"
         for i in range(len(json_data['msgArray'])):
+            h_limit = -1
+            l_limit = -1
+            highest = -1
+            lowest = -1
+            status = ''
+
             j = json_data['msgArray'][i]
             price = j["z"]
             diff = float(j["z"]) - float(j["y"])
@@ -299,7 +324,9 @@ def add_result_to_list(json_str, stock_type):
             name = j["n"]
             volume = j["v"]
 
-            # fix too long name.....
+            highest = float(j['h'])
+            lowest = float(j['l'])
+
             if stock_no == 't00':
                 stock_no = 'TWSE'
                 name = u'上市'
@@ -311,6 +338,19 @@ def add_result_to_list(json_str, stock_type):
                 name = u'上櫃'
                 volume = '{0:d}'.format(int(volume)/100)
 
+            if (float(price) == highest):
+                status = u' 最高'
+            elif (float(price) == lowest):
+                status = u' 最低'
+
+            if stock_no != 'TWSE' and stock_no != 'OTC':
+                h_limit = float(j['u'])
+                l_limit = float(j['w'])
+                if (float(price) == h_limit):
+                    status = u' 漲停！'
+                elif (float(price) == l_limit):
+                    status = u' 跌停！'
+
             date = datetime.strptime(j["d"], '%Y%m%d')
 
             result_time_str = j["d"] + ' ' + j["t"]
@@ -320,9 +360,13 @@ def add_result_to_list(json_str, stock_type):
                 if (now.hour > 13) or (now.hour == 13 and now.minute > 30):
                     time_str = j["t"] + ' (today)'
                 else:
-                    time_str = j["t"] + '        '
+                    time_str = j["t"]
             else:
                 time_str = j["t"] + date.strftime(' (%m/%d)')
+
+            # FIXME: To avoid stock name too long
+            if len(name) > 4:
+                name = stock_no
 
             result = {'id':'', 'name':'', 'price':'', 'change':'', 'ratio':'', 'volume':'', 'time': '', 'type':''}
             result['id']     = stock_no
@@ -331,7 +375,7 @@ def add_result_to_list(json_str, stock_type):
             result['change'] = change_str
             result['ratio']  = change_str_p
             result['volume'] = volume
-            result['time']   = time_str
+            result['time']   = time_str + status
             result['type']   = 'stock'
             ALL_RESULT.append(result)
 
