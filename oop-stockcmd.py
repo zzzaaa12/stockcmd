@@ -21,7 +21,7 @@ class world_index:
     def __init__(self):
         self.google_url = 'http://www.google.com/finance/info?q='
         self.index_list = [['TPE:TAIEX'        , 'TAIEX' , '加權指數'], # Format: google finance id, nickname, timezone, name
-                           ['INDEXDJX:.DJI'    , 'DOW'   , '道瓊指數'], # FIXME: Daylight saving time
+                           ['INDEXDJX:.DJI'    , 'DOW'   , '道瓊指數'],
                            ['INDEXNASDAQ:.IXIC', 'NASDAQ', '那斯達克'],
                            ['INDEXNASDAQ:SOX'  , 'PHLX'  , '費半PHLX'],
                            ['INDEXDB:DAX'      , 'DAX'   , '德國DAX'],
@@ -171,9 +171,15 @@ class taiwan_stock:
 
         for i in range(len(json_data['msgArray'])):
             j = json_data['msgArray'][i]
+            status = ''
             price = j["z"]
-            diff = float(j["z"]) - float(j["y"])
+            stock_no = j["c"]
+            name     = j["n"]
+            volume   = j["v"]
+            highest = float(j['h'])
+            lowest = float(j['l'])
 
+            diff = float(j["z"]) - float(j["y"])
             if diff > 0:
                 sign = '+'
             elif diff < 0:
@@ -184,11 +190,6 @@ class taiwan_stock:
             change_str = sign + '{0:.2f}'.format(diff)
             change_str_p = sign + '{0:.2f}'.format(diff / float(j["y"]) *100)
 
-            stock_no = j["c"]
-            name     = j["n"]
-            volume   = j["v"]
-
-            # fix too long name
             if stock_no == 't00':
                 stock_no = 'TWSE'
                 name = u'上市'
@@ -200,6 +201,20 @@ class taiwan_stock:
                 name = u'上櫃'
                 volume = '{0:d}'.format(int(volume)/100)
 
+            # status
+            if (float(price) == highest):
+                status = u' 最高'
+            elif (float(price) == lowest):
+                status = u' 最低'
+
+            if stock_no != 'TWSE' and stock_no != 'OTC':
+                h_limit = float(j['u'])
+                l_limit = float(j['w'])
+                if (float(price) == h_limit):
+                    status = u' 漲停！'
+                elif (float(price) == l_limit):
+                    status = u' 跌停！'
+
             # check data time
             date = datetime.strptime(j["d"], '%Y%m%d')
             result_time_str = j["d"] + ' ' + j["t"]
@@ -209,12 +224,12 @@ class taiwan_stock:
                 if (now.hour > 13) or (now.hour == 13 and now.minute > 30):
                     time_str = j["t"] + ' (today)'
                 else:
-                    time_str = j["t"] + '        '
+                    time_str = j["t"]
             else:
                 time_str = j["t"] + date.strftime(' (%m/%d)')
 
             # save to self.data
-            result = {'id':'', 'name':'', 'price':'', 'change':'', 'ratio':'', 'volume':'', 'time': ''}
+            result = {'id':'', 'name':'', 'price':'', 'change':'', 'ratio':'', 'volume':'', 'time': '', 'status': ''}
             result['id']     = stock_no
             result['name']   = name
             result['price']  = price
@@ -222,6 +237,7 @@ class taiwan_stock:
             result['ratio']  = change_str_p
             result['volume'] = volume
             result['time']   = time_str
+            result['status']   = status
             self.data.append(result)
 
     def print_stock_info(self):
@@ -235,7 +251,8 @@ class taiwan_stock:
                   '{0:>8s}' .format(stock['change']) + ' ' + \
                   '{0:>8s}%'.format(stock['ratio']) + ' ' + \
                   '{0:>8s}' .format(stock['volume']) + ' ' + \
-                  '{0:>19s}'.format(stock['time'])
+                  '   {0:19s}'.format(stock['time']) + ' ' + \
+                  stock['status']
 
     def add_tw_future(self):
         tw_future = taiwan_future()
@@ -283,6 +300,14 @@ class taiwan_future(HTMLParser):
         volume  = self.data[i+3].replace(',','')
         last_day_price = float(self.data[i+7].replace(',',''))
         ratio   = '{0:.02f}'.format(change / last_day_price * 100)
+        highest = float(self.data[i+5].replace(',',''))
+        lowest = float(self.data[i+6].replace(',',''))
+
+        status = ''
+        if price == highest:
+            status = u' 最高'
+        elif price == lowest:
+            status = u' 最低'
 
         if change > 0:
             sign = '+'
@@ -291,7 +316,7 @@ class taiwan_future(HTMLParser):
 
         change_str = sign + '{0:.0f} '.format(change)
         ratio_str = sign + ratio
-        result = {'id':'', 'name':'', 'price':'', 'change':'', 'ratio':'', 'volume':'', 'time': ''}
+        result = {'id':'', 'name':'', 'price':'', 'change':'', 'ratio':'', 'volume':'', 'time': '', 'status': ''}
         result['id']     = 'WTX'
         result['name']   = '台指期'
         result['price']  = '{0:.0f} '.format(price)
@@ -299,6 +324,7 @@ class taiwan_future(HTMLParser):
         result['ratio']  = ratio_str
         result['volume'] = volume
         result['time']   = time_str
+        result['status'] = status
         return result
 
     def get_data(self):
