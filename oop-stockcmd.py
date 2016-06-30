@@ -17,6 +17,14 @@ from HTMLParser import HTMLParser
 #      ( ) important status change
 #      ( ) limit up/down print
 
+AUTO_UPDATE_SECOND = 20
+PROFILE = {'color_print'   : False,
+           'show_twse'     : False,
+           'show_world'    : False,
+           'show_user_list': False,
+           'monitor_mode'  : False,
+           'monitor_help'  : True}
+
 class world_index:
     def __init__(self):
         self.google_url = 'http://www.google.com/finance/info?q='
@@ -171,7 +179,6 @@ class taiwan_stock:
 
         for i in range(len(json_data['msgArray'])):
             j = json_data['msgArray'][i]
-            status = ''
             price = j["z"]
             stock_no = j["c"]
             name     = j["n"]
@@ -190,6 +197,21 @@ class taiwan_stock:
             change_str = sign + '{0:.2f}'.format(diff)
             change_str_p = sign + '{0:.2f}'.format(diff / float(j["y"]) *100)
 
+            # status
+            status = ''
+            if (float(price) == highest):
+                status = u'最高'
+            elif (float(price) == lowest):
+                status = u'最低'
+
+            if stock_no != 't00' and stock_no != 'o00':
+                h_limit = float(j['u'])
+                l_limit = float(j['w'])
+                if (float(price) == h_limit):
+                    status = u'漲停！'
+                elif (float(price) == l_limit):
+                    status = u'跌停！'
+
             if stock_no == 't00':
                 stock_no = 'TWSE'
                 name = u'上市'
@@ -200,20 +222,6 @@ class taiwan_stock:
                 stock_no = 'OTC'
                 name = u'上櫃'
                 volume = '{0:d}'.format(int(volume)/100)
-
-            # status
-            if (float(price) == highest):
-                status = u' 最高'
-            elif (float(price) == lowest):
-                status = u' 最低'
-
-            if stock_no != 'TWSE' and stock_no != 'OTC':
-                h_limit = float(j['u'])
-                l_limit = float(j['w'])
-                if (float(price) == h_limit):
-                    status = u' 漲停！'
-                elif (float(price) == l_limit):
-                    status = u' 跌停！'
 
             # check data time
             date = datetime.strptime(j["d"], '%Y%m%d')
@@ -245,8 +253,8 @@ class taiwan_stock:
             self.data.append(result)
 
     def print_stock_info(self):
-        print ' 股號     股名     成交價     漲跌    百分比   成交量    資料時間'
-        print '---------------------------------------------------------------------------'
+        print ' 股號     股名     成交價     漲跌    百分比   成交量    資料時間 & 狀態'
+        print '--------------------------------------------------------------------------------'
 
         for stock in self.data:
             print ' ' + '{0:s}'   .format(stock['id']) + \
@@ -255,8 +263,7 @@ class taiwan_stock:
                   '{0:>8s}' .format(stock['change']) + ' ' + \
                   '{0:>8s}%'.format(stock['ratio']) + ' ' + \
                   '{0:>8s}' .format(stock['volume']) + ' ' + \
-                  '   {0:19s}'.format(stock['time']) + ' ' + \
-                  stock['status']
+                  '   ' + stock['time'] + ' ' + stock['status']
 
     def add_tw_future(self):
         tw_future = taiwan_future()
@@ -297,7 +304,7 @@ class taiwan_future(HTMLParser):
             time_str = self.data[i+8] + ' (close)'
         else:
             i = 5
-            time_str = self.data[i+8] + '        '
+            time_str = self.data[i+8]
 
         price   = float(self.data[i].replace(',',''))
         change  = float(self.data[i+1])
@@ -337,33 +344,100 @@ class taiwan_future(HTMLParser):
         return self.read_data()
 
 
-def main():
-    # remote program name
-    argv = sys.argv
-    del argv[0]
+def usage():
+    print 'stockcmd - get stock information for TWSE'
+    print ''
+    print 'Usage:'
+    print '    stockcmd.py [Options] [stock numbers]'
+    print ''
+    print 'Options:'
+    print '    -a: list all stock infomation (include TSE, OTC, other stock)'
+    print '    -s: list information with simple format'
+    print '    -i: list include TSE index and OTC index'
+    print '    -w: list International Stock Indexes'
+    print '    -q: list the stocks predefined'
+    print '    -c: list with color'
+    print '    -d: continue update information every 20 seconds'
+    print '    -h: show this page'
+    print ''
+    print 'Example:'
+    print '    stockcmd.py -i'
+    print '    stockcmd.py -w'
+    print '    stockcmd.py -q'
+    print '    stockcmd.py 2330 2317 3008'
+    print ''
 
-    # read parameters
-    for x in argv:
+
+def read_option(opt):
+    global PROFILE
+    for x in opt:
         if str(x) == '-c':
-            color_print = True
+            PROFILE['color_print'] = True
         elif str(x) == '-a':
-            show_world = True
-            show_twse = True
-            show_stock_list = True
+            PROFILE['show_world'] = True
+            PROFILE['show_twse'] = True
+            PROFILE['show_stock_list'] = True
         elif str(x) == '-w':
-            show_world = True
+            PROFILE['show_world'] = True
         elif str(x) == '-i':
-            show_twse = True
+            PROFILE['show_twse'] = True
         elif str(x) == '-q':
-            show_stock_list = True
+            PROFILE['show_stock_list'] = True
         elif str(x) == '-s':
-            show_simple = True
-            show_stock_list = True
+            PROFILE['show_simple'] = True
+            PROFILE['show_stock_list'] = True
         elif str(x) == '-d':
-            monitor_mode = True
+            PROFILE['monitor_mode'] = True
         elif str(x) == '-h' or str(x) == '--help':
             usage()
             exit()
+
+
+def monitor_read_setting():
+    global PROFILE
+    for x in range(1, AUTO_UPDATE_SECOND, 1):
+        input_cmd = ''
+        i, o, e = select.select([sys.stdin], [], [], 1)
+        if not i:
+            continue
+        input = sys.stdin.readline().strip().upper()
+        if input == 'Q':
+            exit()
+        elif input == 'C':
+            PROFILE.color_print = not PROFILE.color_print
+        elif input == 'S':
+            PROFILE.show_simple = not PROFILE.show_simple
+        elif input == 'I':
+            PROFILE.show_twse = not PROFILE.show_twse
+        elif input == 'W':
+            PROFILE.show_world = not PROFILE.show_world
+        elif input == 'U':
+            PROFILE.show_user_list = not PROFILE.show_user_list
+        elif input == 'H':
+            PROFILE.monitor_help = not PROFILE.monitor_help
+        elif input == 'X':
+            hide_closed_index = not hide_closed_index
+        elif input[:1] == '+' and len(input) > 1:
+            append_stock = True
+            for i in USER_STOCK_LIST:
+                if i == input[1:]:
+                       append_stock = False;
+            if append_stock:
+                USER_STOCK_LIST.append(input[1:])
+
+        elif input[:1] == '-' and len(input) > 1:
+            for i in USER_STOCK_LIST:
+                if i == input[1:]:
+                    USER_STOCK_LIST.remove(i)
+                    break
+
+
+def main():
+    # remove program name
+    argv = sys.argv
+    del argv[0]
+
+    read_option(argv)
 
     world = world_index()
     world.run()
