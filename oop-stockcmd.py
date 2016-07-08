@@ -18,27 +18,31 @@ from HTMLParser import HTMLParser
 #      ( ) limit up/down print
 
 AUTO_UPDATE_SECOND = 20
-PROFILE = {'color_print'   : False,
-           'show_twse'     : False,
-           'show_world'    : False,
-           'show_user_list': False,
-           'monitor_mode'  : False,
-           'monitor_help'  : True}
+PROFILE = {
+    'color_print'   : False,
+    'show_twse'     : False,
+    'show_world'    : False,
+    'show_user_list': False,
+    'monitor_mode'  : False,
+    'monitor_help'  : True
+}
 
-class world_index:
+class WorldIndex:
     def __init__(self):
         self.google_url = 'http://www.google.com/finance/info?q='
-        self.index_list = [['TPE:TAIEX'        , 'TAIEX' , '加權指數'], # Format: google finance id, nickname, timezone, name
-                           ['INDEXDJX:.DJI'    , 'DOW'   , '道瓊指數'],
-                           ['INDEXNASDAQ:.IXIC', 'NASDAQ', '那斯達克'],
-                           ['INDEXNASDAQ:SOX'  , 'PHLX'  , '費半PHLX'],
-                           ['INDEXDB:DAX'      , 'DAX'   , '德國DAX'],
-                           ['INDEXFTSE:UKX'    , 'FTSE'  , '英國FTSE'],
-                           ['INDEXEURO:PX1'    , 'CAC40' , '法國指數'],
-                           ['INDEXNIKKEI:NI225', 'N225'  , '日本指數'],
-                           ['KRX:KOSPI'        , 'KOSPI' , '韓國指數'],
-                           ['SHA:000001'       , 'SHCOMP', '上證指數'],
-                           ['INDEXHANGSENG:HSI', 'HK'    , '香港恆生']]
+        self.index_list = [
+            ['TPE:TAIEX'        , 'TAIEX' , '加權指數'], # Format: google finance id, nickname, timezone, name
+            ['INDEXDJX:.DJI'    , 'DOW'   , '道瓊指數'],
+            ['INDEXNASDAQ:.IXIC', 'NASDAQ', '那斯達克'],
+            ['INDEXNASDAQ:SOX'  , 'PHLX'  , '費半PHLX'],
+            ['INDEXDB:DAX'      , 'DAX'   , '德國DAX'],
+            ['INDEXFTSE:UKX'    , 'FTSE'  , '英國FTSE'],
+            ['INDEXEURO:PX1'    , 'CAC40' , '法國指數'],
+            ['INDEXNIKKEI:NI225', 'N225'  , '日本指數'],
+            ['KRX:KOSPI'        , 'KOSPI' , '韓國指數'],
+            ['SHA:000001'       , 'SHCOMP', '上證指數'],
+            ['INDEXHANGSENG:HSI', 'HK'    , '香港恆生']
+        ]
         self.json_data = ''
         self.query_url = ''
         self.data = []
@@ -98,12 +102,12 @@ class world_index:
         print '---------------------------------------------------------------------------'
 
         for stock in self.data:
-            print ' {0:8s}' .format(stock['id']) + \
-                  '{0:<10s}'.format(stock['name']) + \
-                  '{0:>13s}'.format(stock['price']) + ' ' + \
-                  '{0:>11s}'.format(stock['change']) + ' ' + \
-                  '{0:>9s}%'.format(stock['ratio']) + ' ' + \
-                  '{0:>19s}'.format(stock['time'])
+            print (' {0:8s}' .format(stock['id'])
+                   + '{0:<10s}'.format(stock['name'])
+                   + '{0:>13s}'.format(stock['price'])
+                   + '{0:>12s}'.format(stock['change'])
+                   + '{0:>10s}%'.format(stock['ratio'])
+                   + '{0:>20s}'.format(stock['time']))
 
     def run(self):
         self.create_query_url()
@@ -112,7 +116,7 @@ class world_index:
         self.print_stock_info()
 
 
-class taiwan_stock:
+class TaiwanStock:
     def __init__(self):
         self.user_stock_list = ['00632r','4127','2330','2317']
         self.stock_list = []
@@ -257,16 +261,16 @@ class taiwan_stock:
         print '--------------------------------------------------------------------------------'
 
         for stock in self.data:
-            print ' ' + '{0:s}'   .format(stock['id']) + \
-                  '\t ' + stock['name'] + '\t' + \
-                  '{0:>9s}' .format(stock['price']) + ' ' + \
-                  '{0:>8s}' .format(stock['change']) + ' ' + \
-                  '{0:>8s}%'.format(stock['ratio']) + ' ' + \
-                  '{0:>8s}' .format(stock['volume']) + ' ' + \
-                  '   ' + stock['time'] + ' ' + stock['status']
+            print (' ' + '{0:s}'   .format(stock['id']) + '\t'
+                  + stock['name'] + '\t'
+                  + '{0:>9s}' .format(stock['price'])
+                  + '{0:>9s}' .format(stock['change'])
+                  + '{0:>9s}%'.format(stock['ratio'])
+                  + '{0:>9s}' .format(stock['volume'])
+                  + '   ' + stock['time'] + ' ' + stock['status'])
 
     def add_tw_future(self):
-        tw_future = taiwan_future()
+        tw_future = TaiwanFuture()
         self.data.append(tw_future.get_data())
 
     def run(self):
@@ -278,7 +282,7 @@ class taiwan_stock:
         self.print_stock_info()
 
 
-class taiwan_future(HTMLParser):
+class TaiwanFuture(HTMLParser):
     def __init__(self):
         HTMLParser.__init__(self)
         self.data = []
@@ -439,10 +443,10 @@ def main():
 
     read_option(argv)
 
-    world = world_index()
+    world = WorldIndex()
     world.run()
     print ''
-    tw_stock = taiwan_stock()
+    tw_stock = TaiwanStock()
     tw_stock.run()
 
 if __name__ == '__main__':
