@@ -18,6 +18,7 @@ from HTMLParser import HTMLParser
 #      ( ) limit up/down print
 
 AUTO_UPDATE_SECOND = 20
+
 PROFILE = {
     'color_print'   : False,
     'show_twse'     : False,
@@ -25,6 +26,14 @@ PROFILE = {
     'show_user_list': False,
     'monitor_mode'  : False,
     'monitor_help'  : True
+}
+
+COLOR = {
+    'red':'\033[1;31;40m',
+    'green':'\033[1;32;40m',
+    'yellow':'\033[1;33;40m',
+    'white':'\033[1;37;40m',
+    'end':'\033[0m'
 }
 
 class WorldIndex:
@@ -97,17 +106,34 @@ class WorldIndex:
             print 'unknown timezone: ' + timezone
             return 0
 
-    def print_stock_info(self):
-        print ' 代號      指數          點數         漲跌     百分比    資料時間' 
+    def print_stock_info(self, color_print):
+        if color_print:
+            color = COLOR['yellow']
+            color_end = COLOR['end']
+        else:
+            color = ''
+            color_end = ''
+        print color + ' 代號      指數          點數        漲跌      百分比    資料時間' + color_end
         print '---------------------------------------------------------------------------'
 
         for stock in self.data:
-            print (' {0:8s}' .format(stock['id'])
+            if color_print:
+                change = float(stock['change'])
+                if change > 0:
+                    color = COLOR['red']
+                elif change < 0:
+                    color = COLOR['green']
+                else:
+                    color = COLOR['white']
+
+            print (color + ' {0:8s}' .format(stock['id'])
                    + '{0:<10s}'.format(stock['name'])
                    + '{0:>13s}'.format(stock['price'])
                    + '{0:>12s}'.format(stock['change'])
                    + '{0:>10s}%'.format(stock['ratio'])
-                   + '{0:>20s}'.format(stock['time']))
+                   + '{0:>20s}'.format(stock['time']) + color_end)
+        print''
+
 
     def get_data(self):
         self.create_query_url()
@@ -256,17 +282,32 @@ class TaiwanStock:
             self.data.append(result)
 
 
-    def print_stock_info(self):
-        print ' 股號     股名     成交價     漲跌    百分比   成交量    資料時間 & 狀態'
+    def print_stock_info(self, color_print):
+        if color_print:
+            color = COLOR['yellow']
+            color_end = COLOR['end']
+        else:
+            color = ''
+            color_end = ''
+        print color + ' 股號     股名     成交價     漲跌    百分比   成交量    資料時間 & 狀態' + color_end
         print '--------------------------------------------------------------------------------'
         for stock in self.data:
-            print (' ' + '{0:s}'   .format(stock['id']) + '\t'
+            if color_print:
+                change = float(stock['change'])
+                if change > 0:
+                    color = COLOR['red']
+                elif change < 0:
+                    color = COLOR['green']
+                else:
+                    color = COLOR['white']
+
+            print (color + ' {0:s}'   .format(stock['id']) + '\t '
                   + stock['name'] + '\t'
                   + '{0:>9s}' .format(stock['price'])
                   + '{0:>9s}' .format(stock['change'])
                   + '{0:>9s}%'.format(stock['ratio'])
                   + '{0:>9s}' .format(stock['volume'])
-                  + '   ' + stock['time'] + ' ' + stock['status'])
+                  + '    ' + stock['time'] + ' ' + stock['status'] + color_end)
         print ''
 
 
@@ -446,11 +487,14 @@ def main():
 
     world = WorldIndex()
     world.get_data()
+
     tw_stock = TaiwanStock()
     tw_stock.get_data()
 
-    world.print_stock_info()
-    tw_stock.print_stock_info()
+    # print result
+    world.print_stock_info(PROFILE['color_print'])
+    tw_stock.print_stock_info(PROFILE['color_print'])
+
 
 if __name__ == '__main__':
     main()
