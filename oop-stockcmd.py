@@ -109,11 +109,10 @@ class WorldIndex:
                    + '{0:>10s}%'.format(stock['ratio'])
                    + '{0:>20s}'.format(stock['time']))
 
-    def run(self):
+    def get_data(self):
         self.create_query_url()
         self.query_stock_info()
         self.parse_json_data()
-        self.print_stock_info()
 
 
 class TaiwanStock:
@@ -256,10 +255,10 @@ class TaiwanStock:
             result['status']   = status
             self.data.append(result)
 
+
     def print_stock_info(self):
         print ' 股號     股名     成交價     漲跌    百分比   成交量    資料時間 & 狀態'
         print '--------------------------------------------------------------------------------'
-
         for stock in self.data:
             print (' ' + '{0:s}'   .format(stock['id']) + '\t'
                   + stock['name'] + '\t'
@@ -268,18 +267,19 @@ class TaiwanStock:
                   + '{0:>9s}%'.format(stock['ratio'])
                   + '{0:>9s}' .format(stock['volume'])
                   + '   ' + stock['time'] + ' ' + stock['status'])
+        print ''
+
 
     def add_tw_future(self):
         tw_future = TaiwanFuture()
         self.data.append(tw_future.get_data())
 
-    def run(self):
+    def get_data(self):
         self.add_tw_future()
         self.create_stock_list()
         self.create_query_url()
         self.query_stock_info()
         self.parse_json_data()
-        self.print_stock_info()
 
 
 class TaiwanFuture(HTMLParser):
@@ -341,6 +341,7 @@ class TaiwanFuture(HTMLParser):
         result['time']   = time_str
         result['status'] = status
         return result
+
 
     def get_data(self):
         self.feed(urllib.urlopen("http://info512.taifex.com.tw/Future/FusaQuote_Norl.aspx").read())
@@ -444,10 +445,12 @@ def main():
     read_option(argv)
 
     world = WorldIndex()
-    world.run()
-    print ''
+    world.get_data()
     tw_stock = TaiwanStock()
-    tw_stock.run()
+    tw_stock.get_data()
+
+    world.print_stock_info()
+    tw_stock.print_stock_info()
 
 if __name__ == '__main__':
     main()
