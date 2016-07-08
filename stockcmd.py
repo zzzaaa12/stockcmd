@@ -253,10 +253,10 @@ def get_tw_future():
 
 
 def timezone_diff(timezone):
-    timezone = timezone.replace(' ', '')
-    if timezone[:3] == 'GMT':
-        return 8 - int(timezone[3:])
-    elif timezone[:3] == 'EDT':
+    gmt = timezone.find('GMT')
+    if gmt != -1:
+        return 8 - int(timezone[gmt + 3:])
+    elif timezone.find('EDT') != -1:
         return 8 - (-4)
     else:
         print 'unknown timezone: ' + timezone
@@ -277,7 +277,7 @@ def add_result_to_list(json_str, stock_type):
             if ratio.find('-'):
                 ratio = '+' + ratio
 
-            result_time = datetime.strptime(j["lt_dts"], '%Y-%m-%dT%H:%M:%SZ') + timedelta(hours = timezone_diff(j['lt'][15:]))
+            result_time = datetime.strptime(j["lt_dts"], '%Y-%m-%dT%H:%M:%SZ') + timedelta(hours = timezone_diff(j['lt']))
 
             if (now-result_time).total_seconds() < 1800:
                 time_str = str(result_time.strftime('%H:%M:%S        '))
