@@ -174,20 +174,18 @@ class TaiwanStock:
                 self.user_stock_list.remove(x)
 
 
-    def create_stock_list(self):
+    def create_stock_list(self, show_user_list):
         self.stock_list = []
+
+        if show_user_list:
+            for x in self.user_stock_list:
+                if x.upper() not in self.stock_list:
+                    self.stock_list.append(x.upper())
 
         # add stock in argv
         for x in sys.argv:
-            if x.find('-') == -1:
-                self.append_stock(x)
-
-        # check duplicate and create stock list
-        seen = set()
-        for x in self.user_stock_list:
-            if x.upper() not in seen:
+            if x.find('-') == -1 and x not in self.stock_list:
                 self.stock_list.append(x.upper())
-                seen.add(x.upper())
 
 
     def create_query_url(self):
@@ -335,10 +333,10 @@ class TaiwanStock:
         tw_future = TaiwanFuture()
         self.data.append(tw_future.get_data())
 
-    def get_data(self):
+    def get_data(self, profile):
         self.data = []
         self.add_tw_future()
-        self.create_stock_list()
+        self.create_stock_list(profile['show_user_list'])
         self.create_query_url()
         self.query_stock_info()
         self.parse_json_data()
@@ -454,16 +452,16 @@ def read_option(opt):
         elif str(x) == '-a':
             profile['show_world_index'] = True
             profile['show_twse'] = True
-            profile['show_stock_list'] = True
+            profile['show_user_list'] = True
         elif str(x) == '-w':
             profile['show_world_index'] = True
         elif str(x) == '-i':
             profile['show_twse'] = True
         elif str(x) == '-q':
-            profile['show_stock_list'] = True
+            profile['show_user_list'] = True
         elif str(x) == '-s':
             profile['show_simple'] = True
-            profile['show_stock_list'] = True
+            profile['show_user_list'] = True
         elif str(x) == '-d':
             profile['monitor_mode'] = True
         elif str(x) == '-h' or str(x) == '--help':
@@ -523,7 +521,7 @@ def main():
 
     # read data from TWSE or Goolge Finance
     world.get_data()
-    tw_stock.get_data()
+    tw_stock.get_data(profile)
 
     # clear terminal in monitor mode
     if profile['monitor_mode']:
@@ -552,7 +550,7 @@ def main():
 
         # read data
         world.get_data()
-        tw_stock.get_data()
+        tw_stock.get_data(profile)
 
         # print result
         system('clear')
