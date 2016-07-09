@@ -6,6 +6,9 @@ import json
 import requests
 import urllib
 import re
+import select
+from os import system as system
+from time import sleep as sleep
 from datetime import datetime
 from datetime import timedelta
 from HTMLParser import HTMLParser
@@ -18,15 +21,6 @@ from HTMLParser import HTMLParser
 #      ( ) limit up/down print
 
 AUTO_UPDATE_SECOND = 20
-
-PROFILE = {
-    'color_print'   : False,
-    'show_twse'     : False,
-    'show_world'    : False,
-    'show_user_list': False,
-    'monitor_mode'  : False,
-    'monitor_help'  : True
-}
 
 COLOR = {
     'red':'\033[1;31;40m',
@@ -136,6 +130,7 @@ class WorldIndex:
 
 
     def get_data(self):
+        self.data = []
         self.create_query_url()
         self.query_stock_info()
         self.parse_json_data()
@@ -316,6 +311,7 @@ class TaiwanStock:
         self.data.append(tw_future.get_data())
 
     def get_data(self):
+        self.data = []
         self.add_tw_future()
         self.create_stock_list()
         self.create_query_url()
@@ -415,32 +411,51 @@ def usage():
 
 
 def read_option(opt):
-    global PROFILE
+    profile = {
+        'color_print'   : False,
+        'show_twse'     : False,
+        'show_world'    : False,
+        'show_user_list': False,
+        'monitor_mode'  : False,
+        'monitor_help'  : True
+    }
+
     for x in opt:
         if str(x) == '-c':
-            PROFILE['color_print'] = True
+            profile['color_print'] = True
         elif str(x) == '-a':
-            PROFILE['show_world'] = True
-            PROFILE['show_twse'] = True
-            PROFILE['show_stock_list'] = True
+            profile['show_world'] = True
+            profile['show_twse'] = True
+            profile['show_stock_list'] = True
         elif str(x) == '-w':
-            PROFILE['show_world'] = True
+            profile['show_world'] = True
         elif str(x) == '-i':
-            PROFILE['show_twse'] = True
+            profile['show_twse'] = True
         elif str(x) == '-q':
-            PROFILE['show_stock_list'] = True
+            profile['show_stock_list'] = True
         elif str(x) == '-s':
-            PROFILE['show_simple'] = True
-            PROFILE['show_stock_list'] = True
+            profile['show_simple'] = True
+            profile['show_stock_list'] = True
         elif str(x) == '-d':
-            PROFILE['monitor_mode'] = True
+            profile['monitor_mode'] = True
         elif str(x) == '-h' or str(x) == '--help':
             usage()
             exit()
 
+    profile['monitor_append_stock'] = ''
+    profile['monitor_remove_stock'] = ''
+    profile['monitor_help'] = True
+    profile['hide_closed_index'] = False
 
-def monitor_read_setting():
-    global PROFILE
+    return profile
+
+
+def monitor_read_setting(profile):
+
+    if profile['monitor_help']:
+            print 'Commands: Q->Exit, C->Color, S->Simple, I->TWSE, W->World, U->User\'s List'
+            print '          X->Hide closed index,  +-[stock] -> add or remove stock'
+
     for x in range(1, AUTO_UPDATE_SECOND, 1):
         input_cmd = ''
         i, o, e = select.select([sys.stdin], [], [], 1)
@@ -450,32 +465,26 @@ def monitor_read_setting():
         if input == 'Q':
             exit()
         elif input == 'C':
-            PROFILE.color_print = not PROFILE.color_print
+            profile['color_print'] = not profile['color_print']
         elif input == 'S':
-            PROFILE.show_simple = not PROFILE.show_simple
+            profile['show_simple'] = not profile['show_simple']
         elif input == 'I':
-            PROFILE.show_twse = not PROFILE.show_twse
+            profile['show_twse'] = not profile['show_twse']
         elif input == 'W':
-            PROFILE.show_world = not PROFILE.show_world
+            profile['show_world'] = not profile['show_world']
         elif input == 'U':
-            PROFILE.show_user_list = not PROFILE.show_user_list
+            profile['show_user_list'] = not profile['show_user_list']
         elif input == 'H':
-            PROFILE.monitor_help = not PROFILE.monitor_help
+            profile['monitor_help'] = not profile['monitor_help']
         elif input == 'X':
-            hide_closed_index = not hide_closed_index
+            profile['hide_closed_index'] = not profile['hide_closed_index']
         elif input[:1] == '+' and len(input) > 1:
-            append_stock = True
-            for i in USER_STOCK_LIST:
-                if i == input[1:]:
-                       append_stock = False;
-            if append_stock:
-                USER_STOCK_LIST.append(input[1:])
-
+            profile['monitor_append_stock'] = input[1:]
         elif input[:1] == '-' and len(input) > 1:
-            for i in USER_STOCK_LIST:
-                if i == input[1:]:
-                    USER_STOCK_LIST.remove(i)
-                    break
+            profile['monitor_remove_stock'] = input[1:]
+        break
+
+    return profile
 
 
 def main():
@@ -483,17 +492,42 @@ def main():
     argv = sys.argv
     del argv[0]
 
-    read_option(argv)
+    profile = read_option(argv)
 
+    # create objects
     world = WorldIndex()
-    world.get_data()
-
     tw_stock = TaiwanStock()
+
+    # read data from TWSE or Goolge Finance
+    world.get_data()
     tw_stock.get_data()
 
-    # print result
-    world.print_stock_info(PROFILE['color_print'])
-    tw_stock.print_stock_info(PROFILE['color_print'])
+    # clear terminal in monitor mode
+    if profile['monitor_mode']:
+        system('clear')
+        print ''
+
+    # print data
+    world.print_stock_info(profile['color_print'])
+    tw_stock.print_stock_info(profile['color_print'])
+
+    # loop for monitor mode
+    while profile['monitor_mode']:
+
+        print datetime.now().strftime('Last updated: %Y.%m.%d %H:%M:%S')
+
+        # renew profile
+        profile = monitor_read_setting(profile)
+
+        # read data
+        world.get_data()
+        tw_stock.get_data()
+
+        # print result
+        system('clear')
+        print ''
+        world.print_stock_info(profile['color_print'])
+        tw_stock.print_stock_info(profile['color_print'])
 
 
 if __name__ == '__main__':
