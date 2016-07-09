@@ -145,25 +145,35 @@ class TaiwanStock:
         self.twse_url = 'http://220.229.103.179/stock/api/getStockInfo.jsp?ex_ch='
         self.json_data = ''
 
+
+    def append_stock(self, stock_no):
+        for x in self.user_stock_list:
+            if x == stock_no.upper():
+                return
+        self.user_stock_list.append(stock_no)
+
+
+    def remove_stock(self, stock_no):
+        for x in self.user_list:
+            if x == stock_no.upper():
+                self.user_stock_list.remove(x)
+
+
     def create_stock_list(self):
         self.stock_list = []
-        tmp_list = []
-
-        # add stock in user list
-        for i in self.user_stock_list:
-            tmp_list.append(str(i).upper())
 
         # add stock in argv
-        for i in sys.argv:
-            if i.find('-') == -1:
-                tmp_list.append(i.upper())
+        for x in sys.argv:
+            if x.find('-') == -1:
+                self.append_stock(x)
 
-        # check duplicate and create stock `list
+        # check duplicate and create stock list
         seen = set()
-        for i in tmp_list:
-            if i not in seen:
-                self.stock_list.append(i)
-                seen.add(i)
+        for x in self.user_stock_list:
+            if x.upper() not in seen:
+                self.stock_list.append(x.upper())
+                seen.add(x.upper())
+
 
     def create_query_url(self):
         stock_str = 'tse_t00.tw|otc_o00.tw|'
@@ -412,12 +422,15 @@ def usage():
 
 def read_option(opt):
     profile = {
-        'color_print'   : False,
-        'show_twse'     : False,
-        'show_world'    : False,
-        'show_user_list': False,
-        'monitor_mode'  : False,
-        'monitor_help'  : True
+        'color_print'         : False,
+        'show_twse'           : False,
+        'show_world'          : False,
+        'show_user_list'      : False,
+        'monitor_mode'        : False,
+        'monitor_help'        : True,
+        'hide_closed_index'   : False,
+        'monitor_append_stock': '',
+        'monitor_remove_stock': ''
     }
 
     for x in opt:
@@ -442,15 +455,10 @@ def read_option(opt):
             usage()
             exit()
 
-    profile['monitor_append_stock'] = ''
-    profile['monitor_remove_stock'] = ''
-    profile['monitor_help'] = True
-    profile['hide_closed_index'] = False
-
     return profile
 
 
-def monitor_read_setting(profile):
+def update_profile(profile):
 
     if profile['monitor_help']:
             print 'Commands: Q->Exit, C->Color, S->Simple, I->TWSE, W->World, U->User\'s List'
@@ -513,11 +521,18 @@ def main():
 
     # loop for monitor mode
     while profile['monitor_mode']:
-
         print datetime.now().strftime('Last updated: %Y.%m.%d %H:%M:%S')
 
         # renew profile
-        profile = monitor_read_setting(profile)
+        update_profile(profile)
+
+        # append or remove stock
+        if len(profile['monitor_append_stock']):
+            tw_stock.append_stock(profile['monitor_append_stock'])
+            profile['monitor_append_stock'] = ''
+        elif len(profile['monitor_remove_stock']):
+            tw_stock.remove_stock(profile['monitor_remove_stock'])
+            profile['monitor_remove_stock'] = ''
 
         # read data
         world.get_data()
@@ -528,7 +543,6 @@ def main():
         print ''
         world.print_stock_info(profile['color_print'])
         tw_stock.print_stock_info(profile['color_print'])
-
 
 if __name__ == '__main__':
     main()
