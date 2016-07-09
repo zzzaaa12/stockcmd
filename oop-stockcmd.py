@@ -100,17 +100,32 @@ class WorldIndex:
             print 'unknown timezone: ' + timezone
             return 0
 
-    def print_stock_info(self, color_print):
+    def print_stock_info(self, color_print, hide_closed):
         if color_print:
             color = COLOR['yellow']
             color_end = COLOR['end']
         else:
             color = ''
             color_end = ''
+
+        if hide_closed:
+            # search closed data
+            closed_count = 0
+            for stock in self.data:
+                if stock['time'].find('('):
+                    closed_count = closed_count + 1
+
+            # skip when all index closed
+            if closed_count == len(self.data):
+                return
+
         print color + ' 代號      指數          點數        漲跌      百分比    資料時間' + color_end
         print '---------------------------------------------------------------------------'
 
         for stock in self.data:
+            if hide_closed and stock['time'].find('('):
+                continue
+
             if color_print:
                 change = float(stock['change'])
                 if change > 0:
@@ -424,7 +439,7 @@ def read_option(opt):
     profile = {
         'color_print'         : False,
         'show_twse'           : False,
-        'show_world'          : False,
+        'show_world_index'          : False,
         'show_user_list'      : False,
         'monitor_mode'        : False,
         'monitor_help'        : True,
@@ -437,11 +452,11 @@ def read_option(opt):
         if str(x) == '-c':
             profile['color_print'] = True
         elif str(x) == '-a':
-            profile['show_world'] = True
+            profile['show_world_index'] = True
             profile['show_twse'] = True
             profile['show_stock_list'] = True
         elif str(x) == '-w':
-            profile['show_world'] = True
+            profile['show_world_index'] = True
         elif str(x) == '-i':
             profile['show_twse'] = True
         elif str(x) == '-q':
@@ -479,7 +494,7 @@ def update_profile(profile):
         elif input == 'I':
             profile['show_twse'] = not profile['show_twse']
         elif input == 'W':
-            profile['show_world'] = not profile['show_world']
+            profile['show_world_index'] = not profile['show_world']
         elif input == 'U':
             profile['show_user_list'] = not profile['show_user_list']
         elif input == 'H':
@@ -516,7 +531,8 @@ def main():
         print ''
 
     # print data
-    world.print_stock_info(profile['color_print'])
+    if profile['show_world_index']:
+        world.print_stock_info(profile['color_print'], profile['hide_closed_index'])
     tw_stock.print_stock_info(profile['color_print'])
 
     # loop for monitor mode
@@ -541,7 +557,8 @@ def main():
         # print result
         system('clear')
         print ''
-        world.print_stock_info(profile['color_print'])
+        if profile['show_world_index']:
+            world.print_stock_info(profile['color_print'], profile['hide_closed_index'])
         tw_stock.print_stock_info(profile['color_print'])
 
 if __name__ == '__main__':
