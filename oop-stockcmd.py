@@ -14,11 +14,11 @@ from datetime import timedelta
 from HTMLParser import HTMLParser
 
 # TODO:
-#      ( ) monitor mode
+#      (v) monitor mode
 #      ( ) cmd of monitor mode
-#      ( ) colorful print
-#      ( ) important status change
-#      ( ) limit up/down print
+#      (v) colorful print
+#      (v) important status change
+#      (v) limit up/down print
 
 AUTO_UPDATE_SECOND = 20
 
@@ -439,7 +439,7 @@ def read_option(opt):
     profile = {
         'color_print'         : False,
         'show_twse'           : False,
-        'show_world_index'          : False,
+        'show_world_index'    : False,
         'show_user_list'      : False,
         'monitor_mode'        : False,
         'monitor_help'        : True,
@@ -494,7 +494,7 @@ def update_profile(profile):
         elif input == 'I':
             profile['show_twse'] = not profile['show_twse']
         elif input == 'W':
-            profile['show_world_index'] = not profile['show_world']
+            profile['show_world_index'] = not profile['show_world_index']
         elif input == 'U':
             profile['show_user_list'] = not profile['show_user_list']
         elif input == 'H':
