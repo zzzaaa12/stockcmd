@@ -162,16 +162,13 @@ class TaiwanStock:
 
 
     def append_stock(self, stock_no):
-        for x in self.user_stock_list:
-            if x == stock_no.upper():
-                return
-        self.user_stock_list.append(stock_no)
+        if stock_no.upper() not in self.user_stock_list:
+            self.user_stock_list.append(stock_no.upper())
 
 
     def remove_stock(self, stock_no):
-        for x in self.user_list:
-            if x == stock_no.upper():
-                self.user_stock_list.remove(x)
+        if stock_no.upper() in self.user_stock_list:
+            self.user_stock_list.remove(stock_no.upper())
 
 
     def create_stock_list(self, show_user_list):
