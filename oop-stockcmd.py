@@ -6,7 +6,7 @@ from os import system as system
 from time import sleep as sleep
 from datetime import datetime
 
-''' our files '''
+# files in this project
 from world_index import WorldIndex
 from taiwan_stock import TaiwanStock
 from common import AUTO_UPDATE_SECOND

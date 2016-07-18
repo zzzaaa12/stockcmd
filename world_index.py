@@ -2,9 +2,11 @@
 import requests
 import re
 import json
-from common import COLOR
 from datetime import datetime
 from datetime import timedelta
+
+# files in this project
+from common import COLOR
 
 class WorldIndex:
     def __init__(self):

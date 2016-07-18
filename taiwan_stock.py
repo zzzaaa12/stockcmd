@@ -3,9 +3,11 @@ import csv
 import urllib
 import json
 import requests
-from common import COLOR
 from datetime import datetime
 from HTMLParser import HTMLParser
+
+# files in this project
+from common import COLOR
 
 class TaiwanStock:
     def __init__(self, argv):
