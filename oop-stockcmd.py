@@ -56,8 +56,8 @@ def read_option(opt):
         'monitor_mode'        : False,
         'monitor_help'        : True,
         'hide_closed_index'   : False,
-        'monitor_append_stock': '',
-        'monitor_remove_stock': ''
+        'append_stock': '',
+        'remove_stock': ''
     }
 
     for x in opt:
@@ -114,64 +114,56 @@ def update_profile(profile):
         elif input == 'X':
             profile['hide_closed_index'] = not profile['hide_closed_index']
         elif input[:1] == '+' and len(input) > 1:
-            profile['monitor_append_stock'] = input[1:]
+            profile['append_stock'] = input[1:]
         elif input[:1] == '-' and len(input) > 1:
-            profile['monitor_remove_stock'] = input[1:]
+            profile['remove_stock'] = input[1:]
         break
-
-    return profile
 
 
 def main():
-    # remove program name
     argv = sys.argv
+    # remove program name
     del argv[0]
-
     profile = read_option(argv)
 
     # create objects
     world = WorldIndex()
     tw_stock = TaiwanStock(argv)
 
-    # read data from TWSE or Goolge Finance
-    world.get_data()
-    tw_stock.get_data(profile)
+    # if it is not if monitor mode, just run once
+    while True:
+        # read data
+        if profile['show_world_index']:
+            world.get_data()
+        tw_stock.get_data(profile)
 
-    # clear terminal in monitor mode
-    if profile['monitor_mode']:
+        # clear monitor
         system('clear')
         print ''
 
-    # print data
-    if profile['show_world_index']:
-        world.print_stock_info(profile['color_print'], profile['hide_closed_index'])
-    tw_stock.print_stock_info(profile['color_print'])
+        # print world index
+        if profile['show_world_index']:
+            world.print_stock_info(profile)
 
-    # loop for monitor mode
-    while profile['monitor_mode']:
+        # print tw stock
+        tw_stock.print_stock_info(profile)
+
+        if not profile['monitor_mode']:
+            exit()
+
         print datetime.now().strftime('Last updated: %Y.%m.%d %H:%M:%S')
 
         # renew profile
         update_profile(profile)
 
         # append or remove stock
-        if len(profile['monitor_append_stock']):
-            tw_stock.append_stock(profile['monitor_append_stock'])
-            profile['monitor_append_stock'] = ''
-        elif len(profile['monitor_remove_stock']):
-            tw_stock.remove_stock(profile['monitor_remove_stock'])
-            profile['monitor_remove_stock'] = ''
+        if len(profile['append_stock']):
+            tw_stock.append_stock(profile['append_stock'])
+            profile['append_stock'] = ''
+        elif len(profile['remove_stock']):
+            tw_stock.remove_stock(profile['remove_stock'])
+            profile['remove_stock'] = ''
 
-        # read data
-        world.get_data()
-        tw_stock.get_data(profile)
-
-        # print result
-        system('clear')
-        print ''
-        if profile['show_world_index']:
-            world.print_stock_info(profile['color_print'], profile['hide_closed_index'])
-        tw_stock.print_stock_info(profile['color_print'])
 
 if __name__ == '__main__':
     main()

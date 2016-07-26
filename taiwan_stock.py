@@ -156,7 +156,9 @@ class TaiwanStock:
             self.data.append(result)
 
 
-    def print_stock_info(self, color_print):
+    def print_stock_info(self, profile):
+        color_print = profile['color_print']
+
         if color_print:
             color = COLOR['yellow']
             color_end = COLOR['end']

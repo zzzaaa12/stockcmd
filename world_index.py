@@ -78,7 +78,10 @@ class WorldIndex:
             print 'unknown timezone: ' + timezone
             return 0
 
-    def print_stock_info(self, color_print, hide_closed):
+    def print_stock_info(self, profile):
+        color_print = profile['color_print']
+        hide_closed = profile['hide_closed_index']
+
         if color_print:
             color = COLOR['yellow']
             color_end = COLOR['end']
@@ -90,7 +93,7 @@ class WorldIndex:
             # search closed data
             closed_count = 0
             for stock in self.data:
-                if stock['time'].find('('):
+                if stock['time'].find('(') != -1:
                     closed_count = closed_count + 1
 
             # skip when all index closed
@@ -101,7 +104,7 @@ class WorldIndex:
         print '---------------------------------------------------------------------------'
 
         for stock in self.data:
-            if hide_closed and stock['time'].find('('):
+            if hide_closed and stock['time'].find('(') != -1:
                 continue
 
             if color_print:
