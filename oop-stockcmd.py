@@ -11,13 +11,6 @@ from world_index import WorldIndex
 from taiwan_stock import TaiwanStock
 from common import AUTO_UPDATE_SECOND
 
-# TODO:
-#      (v) monitor mode
-#      ( ) cmd of monitor mode
-#      (v) colorful print
-#      (v) important status change
-#      (v) limit up/down print
-
 
 def usage():
     print 'stockcmd - get stock information for TWSE'
