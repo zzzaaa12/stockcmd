@@ -44,6 +44,10 @@ def usage():
 
 
 def read_option(opt):
+    if len(opt) == 0:
+        usage()
+        exit()
+
     profile = {
         'color_print'         : False,
         'show_twse'           : False,
