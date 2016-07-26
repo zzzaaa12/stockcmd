@@ -161,6 +161,7 @@ class TaiwanStock:
     def print_stock_info(self, profile):
         color_print = profile['color_print']
         show_index = profile['show_twse']
+        show_simple = profile['show_simple']
 
         if color_print:
             color = COLOR['yellow']
@@ -168,8 +169,11 @@ class TaiwanStock:
         else:
             color = ''
             color_end = ''
-        print color + ' 股號     股名     成交價     漲跌    百分比   成交量    資料時間 & 狀態' + color_end
-        print '--------------------------------------------------------------------------------'
+
+        if not show_simple:
+            print color + ' 股號     股名     成交價     漲跌    百分比   成交量    資料時間 & 狀態' + color_end
+            print '--------------------------------------------------------------------------------'
+
         for stock in self.data:
             if not show_index:
                 if stock['id'] == 'TWSE' or stock['id'] == 'OTC' or stock['id'] == 'WTX':
@@ -184,13 +188,19 @@ class TaiwanStock:
                 else:
                     color = COLOR['white']
 
-            print (color + ' {0:s}'   .format(stock['id']) + '\t '
-                  + stock['name'] + '\t'
-                  + '{0:>9s}' .format(stock['price'])
-                  + '{0:>9s}' .format(stock['change'])
-                  + '{0:>9s}%'.format(stock['ratio'])
-                  + '{0:>9s}' .format(stock['volume'])
-                  + '    ' + stock['time'] + ' ' + stock['status'] + color_end)
+            if show_simple:
+                print (color + ' {0:s}'   .format(stock['id']) + '\t '
+                      + '{0:>8s}' .format(stock['price'])
+                      + '{0:>10s}' .format(stock['change'])
+                      + '{0:>10s}%'.format(stock['ratio']) + color_end)
+            else:
+                print (color + ' {0:s}'   .format(stock['id']) + '\t '
+                      + stock['name'] + '\t'
+                      + '{0:>9s}' .format(stock['price'])
+                      + '{0:>9s}' .format(stock['change'])
+                      + '{0:>9s}%'.format(stock['ratio'])
+                      + '{0:>9s}' .format(stock['volume'])
+                      + '    ' + stock['time'] + ' ' + stock['status'] + color_end)
         print ''
 
 

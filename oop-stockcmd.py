@@ -53,6 +53,7 @@ def read_option(opt):
         'show_twse'           : False,
         'show_world_index'    : False,
         'show_user_list'      : True,
+        'show_simple'         : False,
         'monitor_mode'        : False,
         'monitor_help'        : True,
         'hide_closed_index'   : False,
@@ -84,8 +85,8 @@ def read_option(opt):
 def update_profile(profile):
 
     if profile['monitor_help']:
-            print 'Commands: Q->Exit, C->Color, S->Simple, I->TWSE, W->World, U->User\'s List'
-            print '          X->Hide closed index,  +-[stock] -> add or remove stock'
+            print ' Commands: Q->Exit, C->Color, S->Simple, I->TWSE, W->World, U->User\'s List'
+            print '           X->Hide closed index,  +-[stock] -> add or remove stock'
 
     for x in range(1, AUTO_UPDATE_SECOND, 1):
         input_cmd = ''
@@ -147,7 +148,7 @@ def main():
         if not profile['monitor_mode']:
             exit()
 
-        print datetime.now().strftime('Last updated: %Y.%m.%d %H:%M:%S')
+        print datetime.now().strftime(' Last updated: %Y.%m.%d %H:%M:%S')
 
         # renew profile
         update_profile(profile)

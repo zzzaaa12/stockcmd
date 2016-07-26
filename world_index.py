@@ -81,6 +81,7 @@ class WorldIndex:
     def print_stock_info(self, profile):
         color_print = profile['color_print']
         hide_closed = profile['hide_closed_index']
+        show_simple = profile['show_simple']
 
         if color_print:
             color = COLOR['yellow']
@@ -100,8 +101,9 @@ class WorldIndex:
             if closed_count == len(self.data):
                 return
 
-        print color + ' 代號      指數          點數        漲跌      百分比    資料時間' + color_end
-        print '---------------------------------------------------------------------------'
+        if not show_simple:
+            print color + ' 代號      指數          點數        漲跌      百分比    資料時間' + color_end
+            print '---------------------------------------------------------------------------'
 
         for stock in self.data:
             if hide_closed and stock['time'].find('(') != -1:
@@ -116,12 +118,18 @@ class WorldIndex:
                 else:
                     color = COLOR['white']
 
-            print (color + ' {0:8s}' .format(stock['id'])
-                   + '{0:<10s}'.format(stock['name'])
-                   + '{0:>13s}'.format(stock['price'])
-                   + '{0:>12s}'.format(stock['change'])
-                   + '{0:>10s}%'.format(stock['ratio'])
-                   + '{0:>20s}'.format(stock['time']) + color_end)
+            if show_simple:
+                print (color + ' {0:8s}' .format(stock['id'])
+                       + '{0:>9s}'.format(stock['price'])
+                       + '{0:>10s}'.format(stock['change'])
+                       + '{0:>9s}%'.format(stock['ratio']) + color_end)
+            else:
+                print (color + ' {0:8s}' .format(stock['id'])
+                       + '{0:<10s}'.format(stock['name'])
+                       + '{0:>13s}'.format(stock['price'])
+                       + '{0:>12s}'.format(stock['change'])
+                       + '{0:>10s}%'.format(stock['ratio'])
+                       + '{0:>20s}'.format(stock['time']) + color_end)
         print''
 
 
