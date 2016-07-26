@@ -52,7 +52,7 @@ def read_option(opt):
         'color_print'         : False,
         'show_twse'           : False,
         'show_world_index'    : False,
-        'show_user_list'      : False,
+        'show_user_list'      : True,
         'monitor_mode'        : False,
         'monitor_help'        : True,
         'hide_closed_index'   : False,
@@ -66,16 +66,12 @@ def read_option(opt):
         elif str(x) == '-a':
             profile['show_world_index'] = True
             profile['show_twse'] = True
-            profile['show_user_list'] = True
         elif str(x) == '-w':
             profile['show_world_index'] = True
         elif str(x) == '-i':
             profile['show_twse'] = True
-        elif str(x) == '-q':
-            profile['show_user_list'] = True
         elif str(x) == '-s':
             profile['show_simple'] = True
-            profile['show_user_list'] = True
         elif str(x) == '-d':
             profile['monitor_mode'] = True
         elif str(x) == '-h' or str(x) == '--help':
@@ -130,7 +126,7 @@ def main():
     world = WorldIndex()
     tw_stock = TaiwanStock(argv)
 
-    # if it is not if monitor mode, just run once
+    # if it is not monitor mode, just run once
     while True:
         # read data
         if profile['show_world_index']:

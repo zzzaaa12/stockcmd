@@ -21,27 +21,29 @@ class TaiwanStock:
 
 
     def append_stock(self, stock_no):
-        if stock_no.upper() not in self.user_stock_list:
+        if stock_no.upper() not in self.user_stock_list and stock_no.lower() not in self.user_stock_list:
             self.user_stock_list.append(stock_no.upper())
 
 
     def remove_stock(self, stock_no):
         if stock_no.upper() in self.user_stock_list:
             self.user_stock_list.remove(stock_no.upper())
+        if stock_no.lower() in self.user_stock_list:
+            self.user_stock_list.remove(stock_no.lower())
 
 
     def create_stock_list(self, show_user_list):
         self.stock_list = []
 
         if show_user_list:
+            # add stock in user_stock_list
             for x in self.user_stock_list:
                 if x.upper() not in self.stock_list:
                     self.stock_list.append(x.upper())
-
-        # add stock in argv
-        for x in self.argv:
-            if x.find('-') == -1 and x not in self.stock_list:
-                self.stock_list.append(x.upper())
+            # add stock in argv
+            for x in self.argv:
+                if x.find('-') == -1 and x not in self.stock_list:
+                    self.stock_list.append(x.upper())
 
 
     def create_query_url(self):
@@ -158,6 +160,7 @@ class TaiwanStock:
 
     def print_stock_info(self, profile):
         color_print = profile['color_print']
+        show_index = profile['show_twse']
 
         if color_print:
             color = COLOR['yellow']
@@ -168,6 +171,10 @@ class TaiwanStock:
         print color + ' 股號     股名     成交價     漲跌    百分比   成交量    資料時間 & 狀態' + color_end
         print '--------------------------------------------------------------------------------'
         for stock in self.data:
+            if not show_index:
+                if stock['id'] == 'TWSE' or stock['id'] == 'OTC' or stock['id'] == 'WTX':
+                    continue
+
             if color_print:
                 change = float(stock['change'])
                 if change > 0:
