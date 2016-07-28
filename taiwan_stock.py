@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import csv
 import urllib
 import json
 import requests
@@ -42,31 +41,16 @@ class TaiwanStock:
                     self.stock_list.append(x.upper())
             # add stock in argv
             for x in self.argv:
-                if x.find('-') == -1 and x not in self.stock_list:
+                if x.find('-') == -1 and x.upper() not in self.stock_list:
                     self.stock_list.append(x.upper())
 
 
     def create_query_url(self):
         stock_str = 'tse_t00.tw|otc_o00.tw|'
-
         for stock_no in self.stock_list:
-            found = False
-
-            f = open('tse.csv','r')
-            for row in csv.reader(f):
-                if not found and row[0] == str(stock_no):
-                    stock_str = stock_str + 'tse_' + stock_no + '.tw|'
-                    found = True
-            f.close()
-
-            f = open('otc.csv','r')
-            for row in csv.reader(f):
-                if not found and row[0] == str(stock_no):
-                    stock_str = stock_str + 'otc_' + stock_no + '.tw|'
-                    found = True
-            f.close()
-
+            stock_str = stock_str + 'tse_' + stock_no + '.tw|otc_' + stock_no + '.tw|'
         self.stock_query_str = stock_str
+
 
     def query_stock_info(self):
         query_url = self.twse_url + self.stock_query_str
@@ -77,6 +61,7 @@ class TaiwanStock:
 
         # query data
         self.json_data = r.get(query_url).content
+
 
     def parse_json_data(self):
         now = datetime.now()
