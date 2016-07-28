@@ -6,24 +6,13 @@ from datetime import datetime
 from datetime import timedelta
 
 # files in this project
-from common import COLOR
+from setting import COLOR
+from setting import INDEX_LIST
 
 class WorldIndex:
     def __init__(self):
         self.google_url = 'http://www.google.com/finance/info?q='
-        self.index_list = [
-            ['TPE:TAIEX'        , 'TAIEX' , '加權指數'], # Format: google finance id, nickname, timezone, name
-            ['INDEXDJX:.DJI'    , 'DOW'   , '道瓊指數'],
-            ['INDEXNASDAQ:.IXIC', 'NASDAQ', '那斯達克'],
-            ['INDEXNASDAQ:SOX'  , 'PHLX'  , '費半PHLX'],
-            ['INDEXDB:DAX'      , 'DAX'   , '德國DAX'],
-            ['INDEXFTSE:UKX'    , 'FTSE'  , '英國FTSE'],
-            ['INDEXEURO:PX1'    , 'CAC40' , '法國指數'],
-            ['INDEXNIKKEI:NI225', 'N225'  , '日本指數'],
-            ['KRX:KOSPI'        , 'KOSPI' , '韓國指數'],
-            ['SHA:000001'       , 'SHCOMP', '上證指數'],
-            ['INDEXHANGSENG:HSI', 'HK'    , '香港恆生']
-        ]
+        self.index_list = INDEX_LIST
         self.json_data = ''
         self.query_url = ''
         self.data = []

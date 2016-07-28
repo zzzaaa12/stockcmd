@@ -9,7 +9,8 @@ from datetime import datetime
 # files in this project
 from world_index import WorldIndex
 from taiwan_stock import TaiwanStock
-from common import AUTO_UPDATE_SECOND
+from setting import AUTO_UPDATE_SECOND
+from setting import DEFAULT_PROFILE
 
 
 def usage():
@@ -25,7 +26,7 @@ def usage():
     print '    -w: list International Stock Indexes'
     print '    -q: list the stocks predefined'
     print '    -c: list with color'
-    print '    -d: continue update information every 20 seconds'
+    print '    -d: continue update information every ' + str(AUTO_UPDATE_SECOND) + ' seconds'
     print '    -h: show this page'
     print ''
     print 'Example:'
@@ -41,18 +42,7 @@ def read_option(opt):
         usage()
         exit()
 
-    profile = {
-        'color_print'         : False,
-        'show_twse'           : False,
-        'show_world_index'    : False,
-        'show_user_list'      : True,
-        'show_simple'         : False,
-        'monitor_mode'        : False,
-        'monitor_help'        : True,
-        'hide_closed_index'   : False,
-        'append_stock': '',
-        'remove_stock': ''
-    }
+    profile = DEFAULT_PROFILE
 
     for x in opt:
         if str(x) == '-c':

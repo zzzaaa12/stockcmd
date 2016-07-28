@@ -6,15 +6,18 @@ from datetime import datetime
 from HTMLParser import HTMLParser
 
 # files in this project
-from common import COLOR
+from setting import COLOR
+from setting import USER_STOCK_LIST
+from setting import TWSE_SERVER
+from setting import TW_FUTURE_URL
 
 class TaiwanStock:
     def __init__(self, argv):
-        self.user_stock_list = ['00632r','4127','2330','2317']
+        self.user_stock_list = USER_STOCK_LIST
         self.stock_list = []
         self.stock_query_str = ''
         self.data = []
-        self.twse_url = 'http://220.229.103.179/stock/api/getStockInfo.jsp?ex_ch='
+        self.twse_url = TWSE_SERVER + '/stock/api/getStockInfo.jsp?ex_ch='
         self.json_data = ''
         self.argv = argv
 
@@ -57,7 +60,7 @@ class TaiwanStock:
         r = requests.session()
 
         # we need access the website before query data
-        r.get('http://220.229.103.179/')
+        r.get(TWSE_SERVER)
 
         # query data
         self.json_data = r.get(query_url).content
@@ -264,6 +267,6 @@ class TaiwanFuture(HTMLParser):
 
 
     def get_data(self):
-        self.feed(urllib.urlopen("http://info512.taifex.com.tw/Future/FusaQuote_Norl.aspx").read())
+        self.feed(urllib.urlopen(TW_FUTURE_URL).read())
         self.close()
         return self.read_data()
