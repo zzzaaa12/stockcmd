@@ -21,12 +21,12 @@ class TaiwanStock:
         self.json_data = ''
         self.argv = argv
 
-
+    # append stock in monitor mode
     def append_stock(self, stock_no):
         if stock_no.upper() not in self.user_stock_list and stock_no.lower() not in self.user_stock_list:
             self.user_stock_list.append(stock_no.upper())
 
-
+    # remove stock in monitor mode
     def remove_stock(self, stock_no):
         if stock_no.upper() in self.user_stock_list:
             self.user_stock_list.remove(stock_no.upper())
