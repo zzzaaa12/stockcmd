@@ -31,19 +31,18 @@
     -d: 監控模式 (每20秒更新一次資訊)
     -h: 顯示說明頁面
 
-## 自訂預設值
+## 設定檔
 
-使用者可直接修改下列在 setting.py 的預設參數，在查詢時省略上面的參數  
+使用者可直接修改下列在 setting.py 的預設參數，這樣下command時可以省略參數  
 1. USER_STOCK_LIST：台股股號清單  
 2. INDEX_LIST：國際股市清單  
 3. AUTO_UPDATE_SECOND：monitor mode 的更新秒數  
 4. DEFAULT_PROFILE：自訂預設值  
-
-    color_print：彩色顯示  
-    show_twse_index：顯示台指期&上市上櫃指數  
-    show_world_index：顯示國際指數  
-    show_user_list：顯示使用者定義在USER_STOCK_LIST的股票
-    show_simple：顯示簡易格式 (只有股號、成交價、漲跌、百分比)
+ - color_print：彩色顯示  
+ - show_twse_index：顯示台指期&上市上櫃指數  
+ - show_world_index：顯示國際指數  
+ - show_user_list：顯示使用者定義在USER_STOCK_LIST的股票
+ - show_simple：顯示簡易格式 (只有股號、成交價、漲跌、百分比)
 
   
 ## 使用範例
