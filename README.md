@@ -32,6 +32,7 @@ stockcmd
     -h: 顯示說明頁面
 
 **自訂預設值：**  
+
 使用者可直接修改下列在 setting.py 的預設參數，在查詢時省略上面的參數  
 1. USER_STOCK_LIST：台股股號清單  
 2. INDEX_LIST：國際股市清單  
