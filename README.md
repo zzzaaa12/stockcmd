@@ -1,5 +1,6 @@
 # stockcmd
 
+## 簡介
 本專案由 Python 撰寫，主要功能如下：  
 1. 在 terminal 上顯示台指期、大盤指數 & 報價  
 2. 在 terminal 上顯示國際指數報價  
@@ -37,11 +38,12 @@
 2. INDEX_LIST：國際股市清單  
 3. AUTO_UPDATE_SECOND：monitor mode 的更新秒數  
 4. DEFAULT_PROFILE：自訂預設值  
- - color_print：彩色顯示  
- - show_twse_index：顯示台指期&上市上櫃指數  
- - show_world_index：顯示國際指數  
- - show_user_list：顯示使用者定義在USER_STOCK_LIST的股票
- - show_simple：顯示簡易格式 (只有股號、成交價、漲跌、百分比)
+
+    color_print：彩色顯示  
+    show_twse_index：顯示台指期&上市上櫃指數  
+    show_world_index：顯示國際指數  
+    show_user_list：顯示使用者定義在USER_STOCK_LIST的股票
+    show_simple：顯示簡易格式 (只有股號、成交價、漲跌、百分比)
 
   
 ## 使用範例
