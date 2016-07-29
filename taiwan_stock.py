@@ -11,6 +11,7 @@ from setting import USER_STOCK_LIST
 from setting import TWSE_SERVER
 from setting import TW_FUTURE_URL
 
+
 class TaiwanStock:
     def __init__(self, argv):
         self.user_stock_list = USER_STOCK_LIST
@@ -225,6 +226,7 @@ class TaiwanFuture(HTMLParser):
         self.item_limit = 15
         self.item_index = 0
 
+
     def handle_starttag(self, tag, attrs):
         if tag == 'td':
             for attr in attrs:
@@ -232,11 +234,13 @@ class TaiwanFuture(HTMLParser):
                     self.item_index = self.item_index + 1
                     break
 
+
     def handle_data(self, data):
         if self.item_index == 3 or self.item_index == 4:
             if self.item_limit and len(data) < 14:
                 self.item_limit = self.item_limit - 1
                 self.data.append(data)
+
 
     def read_data(self):
         if (self.data[1] == '收盤'):
