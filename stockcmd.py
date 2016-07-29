@@ -50,6 +50,7 @@ def read_option(opt):
         elif str(x) == '-a':
             profile['show_world_index'] = True
             profile['show_twse_index'] = True
+            profile['show_user_list'] = True
         elif str(x) == '-w':
             profile['show_world_index'] = True
         elif str(x) == '-i':
