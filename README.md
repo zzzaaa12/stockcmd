@@ -53,13 +53,13 @@ stockcmd
 2. 自選股 + 上市上櫃指數  
 ![Alt text](/screenshot/2.png "Snapshot")  
 
-3. 自選股 (簡易模式)  
+3. 簡易模式  
 ![Alt text](/screenshot/3.png "Snapshot")  
 
 4. 國際指數  
 ![Alt text](/screenshot/4.png "Snapshot")  
 
-5. 列出所有資訊 (股票清單、上市上櫃、國際股市)  
+5. 列出所有資訊 (上市上櫃、國際股市、自訂清單)  
 ![Alt text](/screenshot/5.png "Snapshot")  
 
 **規劃中功能：**  
