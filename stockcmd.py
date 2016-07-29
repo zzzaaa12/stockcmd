@@ -24,7 +24,7 @@ def usage():
     print '    -s: list information with simple format'
     print '    -i: list include TSE index and OTC index'
     print '    -w: list International Stock Indexes'
-    print '    -q: list the stocks predefined'
+    print '    -u: list stocks predefined in "setting.py"'
     print '    -c: list with color'
     print '    -d: continue update information every ' + str(AUTO_UPDATE_SECOND) + ' seconds'
     print '    -h: show this page'
@@ -32,7 +32,7 @@ def usage():
     print 'Example:'
     print '    stockcmd.py -i'
     print '    stockcmd.py -w'
-    print '    stockcmd.py -q'
+    print '    stockcmd.py -u'
     print '    stockcmd.py 2330 2317 3008'
     print ''
 
@@ -54,6 +54,8 @@ def read_option(opt):
             profile['show_world_index'] = True
         elif str(x) == '-i':
             profile['show_twse_index'] = True
+        elif str(x) == '-u':
+            profile['show_user_list'] = True
         elif str(x) == '-s':
             profile['show_simple'] = True
         elif str(x) == '-d':
@@ -118,7 +120,8 @@ def main():
         tw_result = tw_stock.get_data(profile)
 
         # clear monitor
-        system('clear')
+        if profile['monitor_mode']:
+            system('clear')
         print ''
 
         # print world index
