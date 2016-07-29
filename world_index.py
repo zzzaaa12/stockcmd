@@ -9,6 +9,7 @@ from datetime import timedelta
 from setting import COLOR
 from setting import INDEX_LIST
 
+
 class WorldIndex:
     def __init__(self):
         self.google_url = 'http://www.google.com/finance/info?q='
@@ -17,16 +18,19 @@ class WorldIndex:
         self.query_url = ''
         self.data = []
 
+
     def create_query_url(self):
         stock_str = self.google_url
         for index in self.index_list:
             stock_str = stock_str + index[0] + ','
         self.query_url = stock_str
 
+
     def query_stock_info(self):
         result = requests.get(self.query_url)
         # remove '//' and other special char in json data
         self.json_data = re.sub(r'[^\x00-\x7F]','', result.content.replace('// ', '', 1))
+
 
     def parse_json_data(self):
         now = datetime.now()
@@ -57,6 +61,7 @@ class WorldIndex:
             result['time']   = time_str
             self.data.append(result)
 
+
     def timezone_diff(self, timezone):
         gmt = timezone.find('GMT')
         if gmt != -1:
@@ -66,6 +71,7 @@ class WorldIndex:
         else:
             print 'unknown timezone: ' + timezone
             return 0
+
 
     def print_stock_info(self, profile):
         color_print = profile['color_print']
