@@ -119,6 +119,11 @@ def main():
             world.get_data()
         tw_result = tw_stock.get_data(profile)
 
+        # show usage page when no stock or index
+        if tw_result == False and profile['show_world_index'] == False:
+            usage()
+            exit()
+
         # clear monitor
         if profile['monitor_mode']:
             system('clear')
