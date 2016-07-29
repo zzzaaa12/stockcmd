@@ -42,10 +42,10 @@ class TaiwanStock:
             for x in self.user_stock_list:
                 if x.upper() not in self.stock_list:
                     self.stock_list.append(x.upper())
-            # add stock in argv
-            for x in self.argv:
-                if x.find('-') == -1 and x.upper() not in self.stock_list:
-                    self.stock_list.append(x.upper())
+        # add stock in argv
+        for x in self.argv:
+            if x.find('-') == -1 and x.upper() not in self.stock_list:
+                self.stock_list.append(x.upper())
 
 
     def create_query_url(self):
