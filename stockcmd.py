@@ -128,7 +128,7 @@ def main():
         # clear monitor
         if profile['monitor_mode']:
             system('clear')
-        print ''
+            print ''
 
         # print world index
         if profile['show_world_index']:
