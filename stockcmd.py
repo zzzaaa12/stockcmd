@@ -49,11 +49,11 @@ def read_option(opt):
             profile['color_print'] = True
         elif str(x) == '-a':
             profile['show_world_index'] = True
-            profile['show_twse'] = True
+            profile['show_twse_index'] = True
         elif str(x) == '-w':
             profile['show_world_index'] = True
         elif str(x) == '-i':
-            profile['show_twse'] = True
+            profile['show_twse_index'] = True
         elif str(x) == '-s':
             profile['show_simple'] = True
         elif str(x) == '-d':
@@ -84,7 +84,7 @@ def update_profile(profile):
         elif input == 'S':
             profile['show_simple'] = not profile['show_simple']
         elif input == 'I':
-            profile['show_twse'] = not profile['show_twse']
+            profile['show_twse_index'] = not profile['show_twse_index']
         elif input == 'W':
             profile['show_world_index'] = not profile['show_world_index']
         elif input == 'U':
@@ -115,7 +115,7 @@ def main():
         # read data
         if profile['show_world_index']:
             world.get_data()
-        tw_stock.get_data(profile)
+        tw_result = tw_stock.get_data(profile)
 
         # clear monitor
         system('clear')
@@ -126,7 +126,8 @@ def main():
             world.print_stock_info(profile)
 
         # print tw stock
-        tw_stock.print_stock_info(profile)
+        if tw_result:
+            tw_stock.print_stock_info(profile)
 
         if not profile['monitor_mode']:
             exit()

@@ -48,10 +48,15 @@ class TaiwanStock:
                 self.stock_list.append(x.upper())
 
 
-    def create_query_url(self):
-        stock_str = 'tse_t00.tw|otc_o00.tw|'
+    def create_query_url(self, show_twse_index):
+        if show_twse_index:
+            stock_str = 'tse_t00.tw|otc_o00.tw|'
+        else:
+            stock_str = ''
+
         for stock_no in self.stock_list:
             stock_str = stock_str + 'tse_' + stock_no + '.tw|otc_' + stock_no + '.tw|'
+
         self.stock_query_str = stock_str
 
 
@@ -148,7 +153,7 @@ class TaiwanStock:
 
     def print_stock_info(self, profile):
         color_print = profile['color_print']
-        show_index = profile['show_twse']
+        show_twse_index = profile['show_twse_index']
         show_simple = profile['show_simple']
 
         if color_print:
@@ -163,7 +168,7 @@ class TaiwanStock:
             print '--------------------------------------------------------------------------------'
 
         for stock in self.data:
-            if not show_index:
+            if not show_twse_index:
                 if stock['id'] == 'TWSE' or stock['id'] == 'OTC' or stock['id'] == 'WTX':
                     continue
 
@@ -196,13 +201,21 @@ class TaiwanStock:
         tw_future = TaiwanFuture()
         self.data.append(tw_future.get_data())
 
+
     def get_data(self, profile):
         self.data = []
-        self.add_tw_future()
+        if profile['show_twse_index']:
+            self.add_tw_future()
+
         self.create_stock_list(profile['show_user_list'])
-        self.create_query_url()
-        self.query_stock_info()
-        self.parse_json_data()
+        self.create_query_url(profile['show_twse_index'])
+
+        if len(self.stock_query_str):
+            self.query_stock_info()
+            self.parse_json_data()
+            return True
+
+        return False
 
 
 class TaiwanFuture(HTMLParser):

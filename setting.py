@@ -35,9 +35,9 @@ COLOR = {
 
 DEFAULT_PROFILE = {
     'color_print'         : True,
-    'show_twse'           : True,
+    'show_twse_index'     : False,
     'show_world_index'    : False,
-    'show_user_list'      : True,
+    'show_user_list'      : False,
     'show_simple'         : False,
     'monitor_mode'        : False,
     'monitor_help'        : True,
