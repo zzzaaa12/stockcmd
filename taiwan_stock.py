@@ -45,6 +45,9 @@ class TaiwanStock:
                     self.stock_list.append(x.upper())
         # add stock in argv
         for x in self.argv:
+            # check format of stock number
+            if len(x) > 6 or len(x) < 4 or x[0:1].isdigit() == False:
+                continue
             if x.find('-') == -1 and x.upper() not in self.stock_list:
                 self.stock_list.append(x.upper())
 
