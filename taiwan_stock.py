@@ -24,16 +24,25 @@ class TaiwanStock:
 
     # append stock in monitor mode
     def append_stock(self, stock_no):
+        if self.check_stock_no(stock_no) == False:
+            return
         if stock_no.upper() not in self.user_stock_list and stock_no.lower() not in self.user_stock_list:
             self.user_stock_list.append(stock_no.upper())
 
     # remove stock in monitor mode
     def remove_stock(self, stock_no):
+        if self.check_stock_no(stock_no) == False:
+            return
         if stock_no.upper() in self.user_stock_list:
             self.user_stock_list.remove(stock_no.upper())
         if stock_no.lower() in self.user_stock_list:
             self.user_stock_list.remove(stock_no.lower())
 
+    # check format of stock number
+    def check_stock_no(self, stock_no):
+        if len(stock_no) > 6 or len(stock_no) < 4 or stock_no[0:1].isdigit() == False:
+            return False
+        return True
 
     def create_stock_list(self, show_user_list):
         self.stock_list = []
@@ -45,8 +54,7 @@ class TaiwanStock:
                     self.stock_list.append(x.upper())
         # add stock in argv
         for x in self.argv:
-            # check format of stock number
-            if len(x) > 6 or len(x) < 4 or x[0:1].isdigit() == False:
+            if self.check_stock_no(x) == False:
                 continue
             if x.find('-') == -1 and x.upper() not in self.stock_list:
                 self.stock_list.append(x.upper())
