@@ -4,9 +4,9 @@ import json
 import requests
 from datetime import datetime
 from HTMLParser import HTMLParser
+from termcolor import colored
 
 # files in this project
-from setting import COLOR
 from setting import USER_STOCK_LIST
 from setting import TWSE_SERVER
 from setting import TW_FUTURE_URL
@@ -164,19 +164,18 @@ class TaiwanStock:
 
 
     def print_stock_info(self, profile):
-        color_print = profile['color_print']
         show_twse_index = profile['show_twse_index']
         show_simple = profile['show_simple']
+        color_print = profile['color_print']
+        color_attrs = ['bold']
 
         if color_print:
-            color = COLOR['yellow']
-            color_end = COLOR['end']
+            color = 'yellow'
         else:
-            color = ''
-            color_end = ''
+            color = 'white'
 
         if not show_simple:
-            print color + ' 股號     股名     成交價     漲跌    百分比   成交量    資料時間 & 狀態' + color_end
+            print colored(' 股號     股名     成交價     漲跌    百分比   成交量    資料時間 & 狀態', color, attrs = color_attrs)
             print '--------------------------------------------------------------------------------'
 
         for stock in self.data:
@@ -186,26 +185,29 @@ class TaiwanStock:
 
             if color_print:
                 change = float(stock['change'])
+                color_attrs = ['bold']
+                if stock['status'].find(u'停') > -1:
+                    color_attrs = ['reverse', 'blink']
                 if change > 0:
-                    color = COLOR['red']
+                    color = 'red'
                 elif change < 0:
-                    color = COLOR['green']
+                    color = 'green'
                 else:
-                    color = COLOR['white']
+                    color = 'white'
 
             if show_simple:
-                print (color + ' {0:s}'   .format(stock['id']) + '\t '
+                print colored(' {0:8s}'.format(stock['id'])
                       + '{0:>8s}' .format(stock['price'])
                       + '{0:>10s}' .format(stock['change'])
-                      + '{0:>10s}%'.format(stock['ratio']) + color_end)
+                      + '{0:>10s}%'.format(stock['ratio']), color, attrs = color_attrs)
             else:
-                print (color + ' {0:s}'   .format(stock['id']) + '\t '
+                print colored(' {0:8s}'.format(stock['id'])
                       + stock['name'] + '\t'
                       + '{0:>9s}' .format(stock['price'])
                       + '{0:>9s}' .format(stock['change'])
                       + '{0:>9s}%'.format(stock['ratio'])
                       + '{0:>9s}' .format(stock['volume'])
-                      + '    ' + stock['time'] + ' ' + stock['status'] + color_end)
+                      + '    ' + stock['time'] + ' ' + stock['status'], color, attrs = color_attrs)
         print ''
 
 

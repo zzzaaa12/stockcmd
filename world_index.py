@@ -4,9 +4,9 @@ import re
 import json
 from datetime import datetime
 from datetime import timedelta
+from termcolor import colored
 
 # files in this project
-from setting import COLOR
 from setting import INDEX_LIST
 
 
@@ -74,16 +74,15 @@ class WorldIndex:
 
 
     def print_stock_info(self, profile):
-        color_print = profile['color_print']
         hide_closed = profile['hide_closed_index']
         show_simple = profile['show_simple']
+        color_print = profile['color_print']
+        color_attrs = ['bold']
 
         if color_print:
-            color = COLOR['yellow']
-            color_end = COLOR['end']
+            color = 'yellow'
         else:
-            color = ''
-            color_end = ''
+            color = 'white'
 
         if hide_closed:
             # search closed data
@@ -97,7 +96,7 @@ class WorldIndex:
                 return
 
         if not show_simple:
-            print color + ' 代號      指數          點數        漲跌      百分比    資料時間' + color_end
+            print colored(' 代號      指數          點數        漲跌      百分比    資料時間', color, attrs = color_attrs)
             print '---------------------------------------------------------------------------'
 
         for stock in self.data:
@@ -107,24 +106,24 @@ class WorldIndex:
             if color_print:
                 change = float(stock['change'])
                 if change > 0:
-                    color = COLOR['red']
+                    color = 'red'
                 elif change < 0:
-                    color = COLOR['green']
+                    color = 'green'
                 else:
-                    color = COLOR['white']
+                    color = 'white'
 
             if show_simple:
-                print (color + ' {0:8s}' .format(stock['id'])
+                print colored(' {0:8s}' .format(stock['id'])
                        + '{0:>9s}'.format(stock['price'])
                        + '{0:>10s}'.format(stock['change'])
-                       + '{0:>9s}%'.format(stock['ratio']) + color_end)
+                       + '{0:>9s}%'.format(stock['ratio']), color, attrs = color_attrs)
             else:
-                print (color + ' {0:8s}' .format(stock['id'])
+                print colored(' {0:8s}' .format(stock['id'])
                        + '{0:<10s}'.format(stock['name'])
                        + '{0:>13s}'.format(stock['price'])
                        + '{0:>12s}'.format(stock['change'])
                        + '{0:>10s}%'.format(stock['ratio'])
-                       + '{0:>20s}'.format(stock['time']) + color_end)
+                       + '{0:>20s}'.format(stock['time']), color, attrs = color_attrs)
         print''
 
 
