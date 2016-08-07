@@ -2,6 +2,7 @@
 import requests
 import re
 import json
+import traceback
 from datetime import datetime
 from datetime import timedelta
 from termcolor import colored
@@ -130,5 +131,10 @@ class WorldIndex:
     def get_data(self):
         self.data = []
         self.create_query_url()
-        self.query_stock_info()
-        self.parse_json_data()
+        try:
+            self.query_stock_info()
+            self.parse_json_data()
+        except:
+            traceback.print_exc()
+            return False
+        return True

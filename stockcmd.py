@@ -117,7 +117,7 @@ def main():
     while True:
         # read data
         if profile['show_world_index']:
-            world.get_data()
+            world_result = world.get_data()
         tw_result = tw_stock.get_data(profile)
 
         # show usage page when no stock or index
@@ -131,7 +131,7 @@ def main():
             print ''
 
         # print world index
-        if profile['show_world_index']:
+        if profile['show_world_index'] and world_result:
             world.print_stock_info(profile)
 
         # print tw stock

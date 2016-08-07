@@ -2,6 +2,7 @@
 import urllib
 import json
 import requests
+import traceback
 from datetime import datetime
 from HTMLParser import HTMLParser
 from termcolor import colored
@@ -225,8 +226,12 @@ class TaiwanStock:
         self.create_query_url(profile['show_twse_index'])
 
         if len(self.stock_query_str):
-            self.query_stock_info()
-            self.parse_json_data()
+            try:
+                self.query_stock_info()
+                self.parse_json_data()
+            except:
+                traceback.print_exc()
+                return False
             return True
 
         return False
