@@ -111,17 +111,17 @@ class TaiwanStock:
             # status
             status = ''
             if (float(price) == highest):
-                status = u'最高'
+                status = 'H'
             elif (float(price) == lowest):
-                status = u'最低'
+                status = 'L'
 
             if stock_no != 't00' and stock_no != 'o00':
                 h_limit = float(j['u'])
                 l_limit = float(j['w'])
                 if (float(price) == h_limit):
-                    status = u'漲停！'
+                    status = 'H-limit !!!'
                 elif (float(price) == l_limit):
-                    status = u'跌停！'
+                    status = 'L-limit !!!'
 
             if stock_no == 't00':
                 stock_no = 'TWSE'
@@ -202,7 +202,7 @@ class TaiwanStock:
                       + '{0:>10s}' .format(stock['change'])
                       + '{0:>10s}%'.format(stock['ratio'])
                       + '{0:>9s}' .format(stock['volume'])
-                      + '    ' + stock['status'], color, attrs = color_attrs)
+                      + '   ' + stock['status'], color, attrs = color_attrs)
             else:
                 print colored(' {0:8s}'.format(stock['id'])
                       + stock['name'] + '\t'
@@ -280,9 +280,9 @@ class TaiwanFuture(HTMLParser):
 
         status = ''
         if price == highest:
-            status = u' 最高'
+            status = 'H'
         elif price == lowest:
-            status = u' 最低'
+            status = 'L'
 
         if change > 0:
             sign = '+'
