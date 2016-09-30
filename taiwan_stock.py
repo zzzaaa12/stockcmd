@@ -200,7 +200,9 @@ class TaiwanStock:
                 print colored(' {0:8s}'.format(stock['id'])
                       + '{0:>8s}' .format(stock['price'])
                       + '{0:>10s}' .format(stock['change'])
-                      + '{0:>10s}%'.format(stock['ratio']), color, attrs = color_attrs)
+                      + '{0:>10s}%'.format(stock['ratio'])
+                      + '{0:>9s}' .format(stock['volume'])
+                      + '    ' + stock['status'], color, attrs = color_attrs)
             else:
                 print colored(' {0:8s}'.format(stock['id'])
                       + stock['name'] + '\t'
