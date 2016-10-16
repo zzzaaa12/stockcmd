@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
+import csv
 import urllib
 import json
 import requests
 import traceback
+import time
 from datetime import datetime
 from HTMLParser import HTMLParser
 from termcolor import colored
@@ -68,9 +70,24 @@ class TaiwanStock:
             stock_str = ''
 
         for stock_no in self.stock_list:
-            stock_str = stock_str + 'tse_' + stock_no + '.tw|otc_' + stock_no + '.tw|'
+            found = False
+            f = open('tse.csv', 'r')
+            for row in csv.reader(f):
+                if row[0] == str(stock_no):
+                    stock_str = stock_str + 'tse_' + stock_no + '.tw|'
+                    found = True
+                    break
+            f.close()
+            if not found:
+                f = open('otc.csv', 'r')
+                for row in csv.reader(f):
+                    if row[0] == str(stock_no):
+                        stock_str = stock_str + 'otc_' + stock_no + '.tw|'
+                        found = True
+                        break
+                f.close()
 
-        self.stock_query_str = stock_str
+        self.stock_query_str = stock_str + '&json=1&delay=0&_=' + '{0}'.format(int(time.time() * 1000))
 
 
     def query_stock_info(self):
