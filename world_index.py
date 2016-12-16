@@ -66,9 +66,13 @@ class WorldIndex:
     def timezone_diff(self, timezone):
         gmt = timezone.find('GMT')
         if gmt != -1:
+            if timezone[gmt:] == 'GMT':
+                return 8
             return 8 - int(timezone[gmt + 3:])
         elif timezone.find('EDT') != -1:
             return 8 - (-4)
+        elif timezone.find('EST') != -1:
+            return 8 - (-5)
         else:
             print 'unknown timezone: ' + timezone
             return 0
