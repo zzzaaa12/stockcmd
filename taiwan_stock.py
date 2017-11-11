@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import csv
-import urllib
 import json
 import requests
 import traceback
@@ -19,6 +18,7 @@ class TaiwanStock:
     def __init__(self, argv):
         self.user_stock_list = USER_STOCK_LIST
         self.stock_list = []
+        self.query_list = []
         self.stock_query_str = ''
         self.data = []
         self.twse_url = TWSE_SERVER + '/stock/api/getStockInfo.jsp?ex_ch='
@@ -62,19 +62,19 @@ class TaiwanStock:
             if x.find('-') == -1 and x.upper() not in self.stock_list:
                 self.stock_list.append(x.upper())
 
+    def create_query_list(self, show_twse_index):
+        self.query_list = []
 
-    def create_query_url(self, show_twse_index):
         if show_twse_index:
-            stock_str = 'tse_t00.tw|otc_o00.tw|'
-        else:
-            stock_str = ''
+           self.query_list.append('tse_t00.tw')
+           self.query_list.append('otc_o00.tw')
 
         for stock_no in self.stock_list:
             found = False
             f = open('tse.csv', 'r')
             for row in csv.reader(f):
                 if row[0] == str(stock_no):
-                    stock_str = stock_str + 'tse_' + stock_no + '.tw|'
+                    self.query_list.append('tse_' + stock_no + '.tw')
                     found = True
                     break
             f.close()
@@ -82,16 +82,16 @@ class TaiwanStock:
                 f = open('otc.csv', 'r')
                 for row in csv.reader(f):
                     if row[0] == str(stock_no):
-                        stock_str = stock_str + 'otc_' + stock_no + '.tw|'
+                        self.query_list.append('otc_' + stock_no + '.tw')
                         found = True
                         break
                 f.close()
 
-        self.stock_query_str = stock_str + '&json=1&delay=0&_=' + '{0}'.format(int(time.time() * 1000))
+        #print self.query_list
 
 
-    def query_stock_info(self):
-        query_url = self.twse_url + self.stock_query_str
+    def query_stock_info(self, stock_str):
+        query_url = self.twse_url + stock_str + '&json=1&delay=0&_=' + '{0}'.format(int(time.time() * 1000))
         r = requests.session()
 
         # we need access the website before query data
@@ -99,6 +99,8 @@ class TaiwanStock:
 
         # query data
         self.json_data = r.get(query_url).content
+
+        #print self.json_data
 
 
     def parse_json_data(self):
@@ -242,18 +244,18 @@ class TaiwanStock:
             self.add_tw_future()
 
         self.create_stock_list(profile['show_user_list'])
-        self.create_query_url(profile['show_twse_index'])
+        self.create_query_list(profile['show_twse_index'])
+        # self.create_query_url(profile['show_twse_index'])
 
-        if len(self.stock_query_str):
-            try:
-                self.query_stock_info()
+        try:
+            for i in self.query_list:
+                self.query_stock_info(i)
                 self.parse_json_data()
-            except:
-                traceback.print_exc()
-                return False
-            return True
+        except:
+            traceback.print_exc()
+            return False
 
-        return False
+        return True
 
 
 class TaiwanFuture(HTMLParser):
