@@ -4,6 +4,7 @@ import json
 import requests
 import traceback
 import time
+import urllib
 from datetime import datetime
 from HTMLParser import HTMLParser
 from termcolor import colored
