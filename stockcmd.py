@@ -92,6 +92,7 @@ def update_profile(profile, interval):
             profile['color_print'] = not profile['color_print']
         elif input == 'S':
             profile['show_simple'] = not profile['show_simple']
+            profile['monitor_help'] = not profile['show_simple']
         elif input == 'I':
             profile['show_twse_index'] = not profile['show_twse_index']
         elif input == 'W':
