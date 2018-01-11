@@ -59,6 +59,7 @@ def read_option(opt):
             profile['show_user_list'] = True
         elif str(x) == '-s':
             profile['show_simple'] = True
+            profile['monitor_help'] = False
         elif str(x) == '-d':
             profile['monitor_mode'] = True
         elif str(x) == '-h' or str(x) == '--help':
@@ -68,20 +69,24 @@ def read_option(opt):
     return profile
 
 
-def update_profile(profile):
+def update_profile(profile, interval):
 
     if profile['monitor_help']:
             print ' Commands: Q->Exit, C->Color, S->Simple, I->TWSE, W->World, U->User\'s List'
             print '           X->Hide closed index,  +-[stock] -> add or remove stock'
-
-    for x in range(1, AUTO_UPDATE_SECOND, 1):
+    count = 0
+    for x in range(0, interval):
+        count = count + 1
         input_cmd = ''
         i, o, e = select.select([sys.stdin], [], [], 1)
         if not i:
             continue
         input = sys.stdin.readline().strip().upper()
         if input == 'Q':
-            exit()
+            print 'Exit? (Y/N)'
+            ans = sys.stdin.readline().strip().upper()
+            if ans == 'Y':
+                exit()
         elif input == 'C':
             profile['color_print'] = not profile['color_print']
         elif input == 'S':
@@ -101,6 +106,8 @@ def update_profile(profile):
         elif input[:1] == '-' and len(input) > 1:
             profile['remove_stock'] = input[1:]
         break
+
+    return count
 
 
 def main():
@@ -141,10 +148,19 @@ def main():
         if not profile['monitor_mode']:
             exit()
 
-        print datetime.now().strftime(' Last updated: %Y.%m.%d %H:%M:%S')
+        last_update_time = datetime.now().strftime('%Y.%m.%d %H:%M:%S')
+        print ' Last updated: ' + last_update_time
 
         # renew profile
-        update_profile(profile)
+        interval_count = update_profile(profile, AUTO_UPDATE_SECOND)
+        while interval_count < AUTO_UPDATE_SECOND:
+            system('clear')
+            print ''
+            if tw_result:
+                # show old data within AUTO_UPDATE_SECOND
+                tw_stock.print_stock_info(profile)
+            print ' Last updated: ' + str(last_update_time)
+            interval_count = update_profile(profile, AUTO_UPDATE_SECOND - interval_count)
 
         # append or remove stock
         if len(profile['append_stock']):
@@ -153,7 +169,6 @@ def main():
         elif len(profile['remove_stock']):
             tw_stock.remove_stock(profile['remove_stock'])
             profile['remove_stock'] = ''
-
 
 if __name__ == '__main__':
     main()
