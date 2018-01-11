@@ -195,9 +195,9 @@ class TaiwanStock:
         else:
             color = 'white'
 
-        if not show_simple:
-            print colored(' 股號     股名     成交價     漲跌    百分比   成交量    資料時間 & 狀態', color, attrs = color_attrs)
-            print '--------------------------------------------------------------------------------'
+        if not show_simple and len(self.data) > 0:
+            print colored(' 股號     股名     成交價     漲跌    百分比   成交量     資料時間 & 狀態', color, attrs = color_attrs)
+            print '-------------------------------------------------------------------------------'
 
         for stock in self.data:
             if not show_twse_index:
@@ -230,7 +230,7 @@ class TaiwanStock:
                       + '{0:>9s}' .format(stock['change'])
                       + '{0:>9s}%'.format(stock['ratio'])
                       + '{0:>9s}' .format(stock['volume'])
-                      + '    ' + stock['time'] + ' ' + stock['status'], color, attrs = color_attrs)
+                      + '     ' + stock['time'] + ' ' + stock['status'], color, attrs = color_attrs)
         print ''
 
 

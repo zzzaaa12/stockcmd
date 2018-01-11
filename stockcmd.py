@@ -86,7 +86,7 @@ def update_profile(profile, interval):
         if input == 'Q':
             print 'Exit? (Y/N)'
             ans = sys.stdin.readline().strip().upper()
-            if ans == 'Y':
+            if ans == 'Y' or ans == 'Q':
                 exit()
         elif input == 'C':
             profile['color_print'] = not profile['color_print']
@@ -158,6 +158,8 @@ def main():
         while interval_count < AUTO_UPDATE_SECOND:
             system('clear')
             print ''
+            if profile['show_world_index'] and world_result:
+                world.print_stock_info(profile)
             if tw_result:
                 # show old data within AUTO_UPDATE_SECOND
                 tw_stock.print_stock_info(profile)
