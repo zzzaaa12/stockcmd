@@ -74,6 +74,7 @@ def update_profile(profile, interval):
     if profile['monitor_help']:
             print ' Commands: Q->Exit, C->Color, S->Simple, I->TWSE, W->World, U->User\'s List'
             print '           X->Hide closed index,  +-[stock] -> add or remove stock'
+
     count = 0
     for x in range(0, interval):
         count = count + 1
@@ -160,7 +161,7 @@ def main():
                 # show old data within AUTO_UPDATE_SECOND
                 tw_stock.print_stock_info(profile)
             print ' Last updated: ' + str(last_update_time)
-            interval_count = update_profile(profile, AUTO_UPDATE_SECOND - interval_count)
+            interval_count = interval_count + update_profile(profile, AUTO_UPDATE_SECOND - interval_count)
 
         # append or remove stock
         if len(profile['append_stock']):
