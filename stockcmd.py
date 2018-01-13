@@ -71,13 +71,10 @@ def read_option(opt):
 
 def update_profile(profile, interval):
 
-    if profile['monitor_help']:
-            print ' Commands: Q->Exit, C->Color, S->Simple, I->TWSE, W->World, U->User\'s List'
-            print '           X->Hide closed index,  +-[stock] -> add or remove stock'
-
     count = 0
     for x in range(0, interval):
         count = count + 1
+        refresh = False;
         input_cmd = ''
         i, o, e = select.select([sys.stdin], [], [], 1)
         if not i:
@@ -90,26 +87,27 @@ def update_profile(profile, interval):
                 exit()
         elif input == 'C':
             profile['color_print'] = not profile['color_print']
+            refresh = True
         elif input == 'S':
             profile['show_simple'] = not profile['show_simple']
             profile['monitor_help'] = not profile['show_simple']
+            refresh = True
+        elif input == 'H':
+            profile['monitor_help'] = not profile['monitor_help']
+            refresh = True
         elif input == 'I':
             profile['show_twse_index'] = not profile['show_twse_index']
         elif input == 'W':
             profile['show_world_index'] = not profile['show_world_index']
         elif input == 'U':
             profile['show_user_list'] = not profile['show_user_list']
-        elif input == 'H':
-            profile['monitor_help'] = not profile['monitor_help']
-        elif input == 'X':
-            profile['hide_closed_index'] = not profile['hide_closed_index']
         elif input[:1] == '+' and len(input) > 1:
             profile['append_stock'] = input[1:]
         elif input[:1] == '-' and len(input) > 1:
             profile['remove_stock'] = input[1:]
         break
 
-    return count
+    return {'count':count, 'refresh':refresh}
 
 
 def main():
@@ -120,6 +118,7 @@ def main():
 
     # create objects
     world = WorldIndex()
+    world_result = False
     tw_stock = TaiwanStock(argv)
 
     # if it is not monitor mode, just run once
@@ -152,19 +151,32 @@ def main():
 
         last_update_time = datetime.now().strftime('%Y.%m.%d %H:%M:%S')
         print ' Last updated: ' + last_update_time
+        if profile['monitor_help']:
+                print ' Commands: Q->Exit, C->Color, S->Simple, I->TWSE, W->World, U->User\'s List'
+                print '           X->Hide closed index,  +-[stock] -> add or remove stock'
 
         # renew profile
-        interval_count = update_profile(profile, AUTO_UPDATE_SECOND)
-        while interval_count < AUTO_UPDATE_SECOND:
-            system('clear')
-            print ''
-            if profile['show_world_index'] and world_result:
-                world.print_stock_info(profile)
-            if tw_result:
-                # show old data within AUTO_UPDATE_SECOND
-                tw_stock.print_stock_info(profile)
-            print ' Last updated: ' + str(last_update_time)
-            interval_count = interval_count + update_profile(profile, AUTO_UPDATE_SECOND - interval_count)
+        update = update_profile(profile, AUTO_UPDATE_SECOND)
+        update_count = update['count']
+        while update_count < AUTO_UPDATE_SECOND:
+            if update['refresh']:
+                system('clear')
+                print ''
+                if profile['show_world_index'] and world_result:
+                    world.print_stock_info(profile)
+                if tw_result:
+                    # show old data within AUTO_UPDATE_SECOND
+                    tw_stock.print_stock_info(profile)
+                print ' Last updated: ' + str(last_update_time)
+                if profile['monitor_help']:
+                        print ' Commands: Q->Exit, C->Color, S->Simple, I->TWSE, W->World, U->User\'s List'
+                        print '           X->Hide closed index,  +-[stock] -> add or remove stock'
+
+            else:
+                print 'The setting will apply at last update, please wait ' + str(AUTO_UPDATE_SECOND - update_count) + ' secs'
+
+            update = update_profile(profile, AUTO_UPDATE_SECOND - update_count)
+            update_count = update_count + update['count']
 
         # append or remove stock
         if len(profile['append_stock']):
