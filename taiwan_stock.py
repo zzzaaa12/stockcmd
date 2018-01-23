@@ -172,7 +172,7 @@ class TaiwanStock:
                 name = stock_no
 
             # save to self.data
-            result = {'id':'', 'name':'', 'price':'', 'change':'', 'ratio':'', 'volume':'', 'time': '', 'status': ''}
+            result = {'id':'', 'name':'', 'price':'', 'change':'', 'ratio':'', 'volume':'', 'time': '', 'H': '', 'L': '', 'status': ''}
             result['id']     = stock_no
             result['name']   = name
             result['price']  = price
@@ -180,7 +180,9 @@ class TaiwanStock:
             result['ratio']  = change_str_p
             result['volume'] = volume
             result['time']   = time_str
-            result['status']   = status
+            result['L'] = str(lowest)
+            result['H'] = str(highest)
+            result['status'] = status
             self.data.append(result)
 
 
@@ -196,8 +198,8 @@ class TaiwanStock:
             color = 'white'
 
         if not show_simple and len(self.data) > 0:
-            print colored(' 股號     股名     成交價     漲跌    百分比   成交量     資料時間 & 狀態', color, attrs = color_attrs)
-            print '-------------------------------------------------------------------------------'
+            print colored(' 股號     股名     成交價     漲跌    百分比   成交量        股價區間         資料時間 & 狀態', color, attrs = color_attrs)
+            print '-----------------------------------------------------------------------------------------------'
 
         for stock in self.data:
             if not show_twse_index:
@@ -218,10 +220,13 @@ class TaiwanStock:
 
             if show_simple:
                 print colored(' {0:8s}'.format(stock['id'])
-                      + '{0:>8s}' .format(stock['price'])
-                      + '{0:>10s}' .format(stock['change'])
+                      + '{0:>8s}'.format(stock['price'])
+                      + '{0:>10s}'.format(stock['change'])
                       + '{0:>10s}%'.format(stock['ratio'])
-                      + '{0:>9s}' .format(stock['volume'])
+                      + '{0:>9s}'.format(stock['volume'])
+                      + '{0:>12s}'.format(stock['L'])
+                      + ' ~ '
+                      + '{0:<8s}'.format(stock['H'])
                       + '   ' + stock['status'], color, attrs = color_attrs)
             else:
                 print colored(' {0:8s}'.format(stock['id'])
@@ -230,6 +235,9 @@ class TaiwanStock:
                       + '{0:>9s}' .format(stock['change'])
                       + '{0:>9s}%'.format(stock['ratio'])
                       + '{0:>9s}' .format(stock['volume'])
+                      + '{0:>11s}'.format(stock['L'])
+                      + ' ~ '
+                      + '{0:<8s}'.format(stock['H'])
                       + '     ' + stock['time'] + ' ' + stock['status'], color, attrs = color_attrs)
         print ''
 
@@ -311,13 +319,15 @@ class TaiwanFuture(HTMLParser):
 
         change_str = sign + '{0:.0f} '.format(change)
         ratio_str = sign + ratio
-        result = {'id':'', 'name':'', 'price':'', 'change':'', 'ratio':'', 'volume':'', 'time': '', 'status': ''}
+        result = {'id':'', 'name':'', 'price':'', 'change':'', 'ratio':'', 'volume':'', 'time': '', 'H': '', 'L': '', 'status': ''}
         result['id']     = 'WTX'
         result['name']   = '台指期'
         result['price']  = '{0:.0f} '.format(price)
         result['change'] = change_str
         result['ratio']  = ratio_str
         result['volume'] = volume
+        result['L']      = str(lowest)
+        result['H']      = str(highest)
         result['time']   = time_str
         result['status'] = status
         return result
