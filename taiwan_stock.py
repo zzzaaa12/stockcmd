@@ -48,14 +48,14 @@ class TaiwanStock:
             return False
         return True
 
-    def create_stock_list(self, show_user_list):
+    def create_stock_list(self):
         self.stock_list = []
 
-        if show_user_list:
-            # add stock in user_stock_list
-            for x in self.user_stock_list:
-                if x.upper() not in self.stock_list:
-                    self.stock_list.append(x.upper())
+        # add stock in user_stock_list
+        for x in self.user_stock_list:
+            if x.upper() not in self.stock_list:
+                self.stock_list.append(x.upper())
+
         # add stock in argv
         for x in self.argv:
             if self.check_stock_no(x) == False:
@@ -252,7 +252,7 @@ class TaiwanStock:
         if profile['show_twse_index']:
             self.add_tw_future()
 
-        self.create_stock_list(profile['show_user_list'])
+        self.create_stock_list()
         self.create_query_list(profile['show_twse_index'])
         # self.create_query_url(profile['show_twse_index'])
 

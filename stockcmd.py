@@ -24,7 +24,6 @@ def usage():
     print '    -s: list information with simple format'
     print '    -i: list include TSE index and OTC index'
     print '    -w: list International Stock Indexes'
-    print '    -u: list stocks predefined in "setting.py"'
     print '    -c: list with color'
     print '    -d: continue update information every ' + str(AUTO_UPDATE_SECOND) + ' seconds'
     print '    -h: show this page'
@@ -50,13 +49,10 @@ def read_option(opt):
         elif str(x) == '-a':
             profile['show_world_index'] = True
             profile['show_twse_index'] = True
-            profile['show_user_list'] = True
         elif str(x) == '-w':
             profile['show_world_index'] = True
         elif str(x) == '-i':
             profile['show_twse_index'] = True
-        elif str(x) == '-u':
-            profile['show_user_list'] = True
         elif str(x) == '-s':
             profile['show_simple'] = True
             profile['monitor_help'] = False
@@ -99,8 +95,6 @@ def update_profile(profile, interval):
             profile['show_twse_index'] = not profile['show_twse_index']
         elif input == 'W':
             profile['show_world_index'] = not profile['show_world_index']
-        elif input == 'U':
-            profile['show_user_list'] = not profile['show_user_list']
         elif input[:1] == '+' and len(input) > 1:
             profile['append_stock'] = input[1:]
         elif input[:1] == '-' and len(input) > 1:

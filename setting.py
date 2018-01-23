@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # taiwan stock setting
-USER_STOCK_LIST = ['2330','2317','3008','00664R','00632R']
+USER_STOCK_LIST = ['2330','2317','3008','6142','00664R','00632R']
 TWSE_SERVER = 'http://220.229.103.179' # mis.twse.com.tw
 TW_FUTURE_URL = 'http://info512.taifex.com.tw/Future/FusaQuote_Norl.aspx'
 
@@ -29,7 +29,6 @@ DEFAULT_PROFILE = {
     'color_print'         : False,
     'show_twse_index'     : False,
     'show_world_index'    : False,
-    'show_user_list'      : False,
     'show_simple'         : False,
     'monitor_mode'        : False,
     'monitor_help'        : True,
