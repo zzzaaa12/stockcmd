@@ -244,7 +244,11 @@ class TaiwanStock:
 
     def add_tw_future(self):
         tw_future = TaiwanFuture()
-        self.data.append(tw_future.get_data())
+        try:
+            self.data.append(tw_future.get_data())
+        except:
+            print 'add_tw_future() failed'
+            return False
 
 
     def get_data(self, profile):
