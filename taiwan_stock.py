@@ -244,11 +244,9 @@ class TaiwanStock:
 
     def add_tw_future(self):
         tw_future = TaiwanFuture()
-        try:
-            self.data.append(tw_future.get_data())
-        except:
-            print 'add_tw_future() failed'
-            return False
+        future_data = tw_future.get_data()
+        if future_data != None:
+            self.data.append(future_data)
 
 
     def get_data(self, profile):
@@ -338,6 +336,10 @@ class TaiwanFuture(HTMLParser):
 
 
     def get_data(self):
-        self.feed(urllib.urlopen(TW_FUTURE_URL).read())
-        self.close()
-        return self.read_data()
+        try:
+            self.feed(urllib.urlopen(TW_FUTURE_URL).read())
+            self.close()
+            return self.read_data()
+        except:
+            print 'add_tw_future() failed'
+            return None
