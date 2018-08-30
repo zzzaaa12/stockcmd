@@ -4,7 +4,7 @@ import json
 import requests
 import traceback
 import time
-import urllib
+import urllib2
 from datetime import datetime
 from HTMLParser import HTMLParser
 from termcolor import colored
@@ -95,11 +95,13 @@ class TaiwanStock:
         query_url = self.twse_url + stock_str + '&json=1&delay=0&_=' + '{0}'.format(int(time.time() * 1000))
         r = requests.session()
 
-        # we need access the website before query data
-        r.get(TWSE_SERVER)
-
-        # query data
-        self.json_data = r.get(query_url).content
+        try:
+            # we need access the website before query data
+            r.get(TWSE_SERVER, timeout=10)
+            # query data
+            self.json_data = r.get(query_url, timeout=10).content
+        except:
+            self.json_data = ''
 
         #print self.json_data
 
@@ -135,7 +137,8 @@ class TaiwanStock:
             elif (float(price) == lowest):
                 status = 'L'
 
-            if stock_no != 't00' and stock_no != 'o00':
+            # I cannot found 'w' in 00633L
+            if stock_no != 't00' and stock_no != 'o00' and len(stock_no) == 4:
                 h_limit = float(j['u'])
                 l_limit = float(j['w'])
                 if (float(price) == h_limit):
@@ -146,13 +149,16 @@ class TaiwanStock:
             if stock_no == 't00':
                 stock_no = 'TWSE'
                 name = u'上市'
-                price = '{0:.0f} '.format(float(price))
+                price = '{0:.0f}'.format(float(price))
                 change_str = sign + '{0:.0f} '.format(diff)
-                volume = '{0:d}'.format(int(volume)/100)
+                volume = '{0:d}E'.format(int(volume)/100)
             elif stock_no == 'o00':
                 stock_no = 'OTC'
                 name = u'上櫃'
-                volume = '{0:d}'.format(int(volume)/100)
+                volume = '{0:d}E'.format(int(volume)/100)
+            else:
+                if float(price) > 999.5:
+                    price = '{0:.0f}'.format(float(price))
 
             # check data time
             date = datetime.strptime(j["d"], '%Y%m%d')
@@ -219,15 +225,12 @@ class TaiwanStock:
                     color = 'white'
 
             if show_simple:
-                print colored(' {0:8s}'.format(stock['id'])
-                      + '{0:>8s}'.format(stock['price'])
-                      + '{0:>10s}'.format(stock['change'])
-                      + '{0:>10s}%'.format(stock['ratio'])
-                      + '{0:>9s}'.format(stock['volume'])
-                      + '{0:>12s}'.format(stock['L'])
-                      + ' ~ '
-                      + '{0:<8s}'.format(stock['H'])
-                      + '   ' + stock['status'], color, attrs = color_attrs)
+                print colored(' {0:7s}'.format(stock['id'])
+                      + '{0:>6s}'.format(stock['price'])
+                      + '{0:>8s}'.format(stock['change'])
+                      + ' ({0:>5s}%)'.format(stock['ratio'])
+                      + '{0:>7s}'.format(stock['volume'])
+                      + ' ' + stock['status'], color, attrs = color_attrs)
             else:
                 print colored(' {0:8s}'.format(stock['id'])
                       + stock['name'] + '\t'
@@ -238,7 +241,7 @@ class TaiwanStock:
                       + '{0:>11s}'.format(stock['L'])
                       + ' ~ '
                       + '{0:<8s}'.format(stock['H'])
-                      + '     ' + stock['time'] + ' ' + stock['status'], color, attrs = color_attrs)
+                      + '   ' + stock['time'] + ' ' + stock['status'], color, attrs = color_attrs)
         print ''
 
 
@@ -324,10 +327,10 @@ class TaiwanFuture(HTMLParser):
         result = {'id':'', 'name':'', 'price':'', 'change':'', 'ratio':'', 'volume':'', 'time': '', 'H': '', 'L': '', 'status': ''}
         result['id']     = 'WTX'
         result['name']   = '台指期'
-        result['price']  = '{0:.0f} '.format(price)
+        result['price']  = '{0:.0f}'.format(price)
         result['change'] = change_str
         result['ratio']  = ratio_str
-        result['volume'] = volume
+        result['volume'] = str(int(float(volume)/1000)) + 'K'
         result['L']      = str(lowest)
         result['H']      = str(highest)
         result['time']   = time_str
@@ -337,9 +340,10 @@ class TaiwanFuture(HTMLParser):
 
     def get_data(self):
         try:
-            self.feed(urllib.urlopen(TW_FUTURE_URL).read())
+            self.feed(urllib2.urlopen(TW_FUTURE_URL, timeout=10).read())
             self.close()
             return self.read_data()
         except:
             print 'add_tw_future() failed'
+            traceback.print_exc()
             return None
