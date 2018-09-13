@@ -108,17 +108,18 @@ class TaiwanStock:
 
     def parse_json_data(self):
         now = datetime.now()
-        json_data = json.loads(self.json_data)
 
         if self.json_data.find('msgArray') == -1:
             return
+
+        json_data = json.loads(self.json_data)
 
         for i in range(len(json_data['msgArray'])):
             j = json_data['msgArray'][i]
             price = j["z"]
             stock_no = j["c"]
             name     = j["n"]
-            volume   = j["v"]
+            volume   = int(j["v"])
             highest = float(j['h'])
             lowest = float(j['l'])
 
@@ -154,11 +155,11 @@ class TaiwanStock:
                 name = u'上市'
                 price = '{0:.0f}'.format(float(price))
                 change_str = sign + '{0:.0f} '.format(diff)
-                volume = '{0:d}E'.format(int(volume)/100)
+                volume = volume / 100
             elif stock_no == 'o00':
                 stock_no = 'OTC'
                 name = u'上櫃'
-                volume = '{0:d}E'.format(int(volume)/100)
+                volume = volume / 100
             else:
                 if float(price) > 999.5:
                     price = '{0:.0f}'.format(float(price))
@@ -181,7 +182,7 @@ class TaiwanStock:
                 name = stock_no
 
             # save to self.data
-            result = {'id':'', 'name':'', 'price':'', 'change':'', 'ratio':'', 'volume':'', 'time': '', 'H': '', 'L': '', 'status': ''}
+            result = {'id':'', 'name':'', 'price':'', 'change':'', 'ratio':'', 'volume':0, 'time': '', 'H': '', 'L': '', 'status': ''}
             result['id']     = stock_no
             result['name']   = name
             result['price']  = price
@@ -232,7 +233,7 @@ class TaiwanStock:
                       + '{0:>6s}'.format(stock['price'])
                       + '{0:>8s}'.format(stock['change'])
                       + ' ({0:>5s}%)'.format(stock['ratio'])
-                      + '{0:>7s}'.format(stock['volume'])
+                      + '{0:>7d}'.format(stock['volume'])
                       + ' ' + stock['status'], color, attrs = color_attrs)
             else:
                 print colored(' {0:8s}'.format(stock['id'])
@@ -240,7 +241,7 @@ class TaiwanStock:
                       + '{0:>9s}' .format(stock['price'])
                       + '{0:>9s}' .format(stock['change'])
                       + '{0:>9s}%'.format(stock['ratio'])
-                      + '{0:>9s}' .format(stock['volume'])
+                      + '{0:>9d}' .format(stock['volume'])
                       + '{0:>11s}'.format(stock['L'])
                       + ' ~ '
                       + '{0:<8s}'.format(stock['H'])
@@ -308,7 +309,7 @@ class TaiwanFuture(HTMLParser):
 
         price   = float(self.data[i].replace(',',''))
         change  = float(self.data[i+1])
-        volume  = self.data[i+3].replace(',','')
+        volume  = int(self.data[i+3].replace(',',''))
         last_day_price = float(self.data[i+7].replace(',',''))
         ratio   = '{0:.02f}'.format(change / last_day_price * 100)
         highest = float(self.data[i+5].replace(',',''))
@@ -327,13 +328,13 @@ class TaiwanFuture(HTMLParser):
 
         change_str = sign + '{0:.0f} '.format(change)
         ratio_str = sign + ratio
-        result = {'id':'', 'name':'', 'price':'', 'change':'', 'ratio':'', 'volume':'', 'time': '', 'H': '', 'L': '', 'status': ''}
+        result = {'id':'', 'name':'', 'price':'', 'change':'', 'ratio':'', 'volume':0, 'time': '', 'H': '', 'L': '', 'status': ''}
         result['id']     = 'WTX'
         result['name']   = '台指期'
         result['price']  = '{0:.0f}'.format(price)
         result['change'] = change_str
         result['ratio']  = ratio_str
-        result['volume'] = str(int(float(volume)/1000)) + 'K'
+        result['volume'] = volume
         result['L']      = str(lowest)
         result['H']      = str(highest)
         result['time']   = time_str
