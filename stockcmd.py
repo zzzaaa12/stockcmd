@@ -167,7 +167,7 @@ def main():
                         print '           X->Hide closed index,  +-[stock] -> add or remove stock'
 
             else:
-                print 'The setting will apply at last update, please wait ' + str(AUTO_UPDATE_SECOND - update_count) + ' secs'
+                print 'The setting will apply after ' + str(AUTO_UPDATE_SECOND - update_count) + ' secs'
 
             update = update_profile(profile, AUTO_UPDATE_SECOND - update_count)
             update_count = update_count + update['count']
