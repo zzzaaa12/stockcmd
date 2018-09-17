@@ -107,11 +107,10 @@ class TaiwanStock:
 
 
     def parse_json_data(self):
-        now = datetime.now()
-        json_data = json.loads(self.json_data)
-
         if self.json_data.find('msgArray') == -1:
             return
+        now = datetime.now()
+        json_data = json.loads(self.json_data)
 
         for i in range(len(json_data['msgArray'])):
             j = json_data['msgArray'][i]
