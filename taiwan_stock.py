@@ -113,13 +113,16 @@ class TaiwanStock:
         json_data = json.loads(self.json_data)
 
         for i in range(len(json_data['msgArray'])):
-            j = json_data['msgArray'][i]
-            price = j["z"]
-            stock_no = j["c"]
-            name     = j["n"]
-            volume   = j["v"]
-            highest = float(j['h'])
-            lowest = float(j['l'])
+            try:
+                j = json_data['msgArray'][i]
+                price = j["z"]
+                stock_no = j["c"]
+                name     = j["n"]
+                volume   = j["v"]
+                highest = float(j['h'])
+                lowest = float(j['l'])
+            except:
+                continue
 
             diff = float(j["z"]) - float(j["y"])
             if diff > 0:
@@ -205,6 +208,8 @@ class TaiwanStock:
         else:
             color = 'white'
 
+        print ''
+
         if not show_simple and len(self.data) > 0:
             print colored(' 股號     股名   成交價    漲跌   百分比   成交量      股價區間        資料時間 & 狀態', color, attrs = color_attrs)
             print '-----------------------------------------------------------------------------------------------'
@@ -230,7 +235,7 @@ class TaiwanStock:
                 print colored(' {0:7s}'.format(stock['id'])
                       + '{0:>6s}'.format(stock['price'])
                       + '{0:>8s}'.format(stock['change'])
-                      + ' ({0:>5s}%)'.format(stock['ratio'])
+                      + '{0:>10s}'.format('(' + stock['ratio'] + '%)')
                       + '{0:>7s}'.format(stock['volume'])
                       + ' ' + stock['status'], color, attrs = color_attrs)
             else:
@@ -268,7 +273,8 @@ class TaiwanStock:
                 self.query_stock_info(i)
                 self.parse_json_data()
         except:
-            traceback.print_exc()
+            #traceback.print_exc()
+            print 'TaiwanStock.get_data() failed'
             return False
 
         return True
@@ -346,6 +352,6 @@ class TaiwanFuture(HTMLParser):
             self.close()
             return self.read_data()
         except:
-            print 'add_tw_future() failed'
-            traceback.print_exc()
+            print 'TaiwanFuture.get_data() failed'
+            #traceback.print_exc()
             return None

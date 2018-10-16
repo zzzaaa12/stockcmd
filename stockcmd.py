@@ -116,7 +116,6 @@ def main():
         # clear monitor
         if profile['monitor_mode']:
             system('clear')
-            print ''
 
         # print tw stock
         if tw_result:
