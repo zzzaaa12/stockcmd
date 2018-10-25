@@ -4,7 +4,7 @@ import json
 import requests
 import traceback
 import time
-import urllib3
+import urllib2
 from datetime import datetime
 from HTMLParser import HTMLParser
 from termcolor import colored
@@ -91,23 +91,15 @@ class TaiwanStock:
         #print self.query_list
 
 
-    def query_stock_info(self):
-        query_url = self.twse_url + self.stock_query_str + '&json=1&delay=0&_=' + '{0}'.format(int(time.time() * 1000))
+    def query_stock_info(self, stock_str):
+        query_url = self.twse_url + stock_str + '&json=1&delay=0&_=' + '{0}'.format(int(time.time() * 1000))
+        r = requests.session()
 
         try:
-            http = urllib3.PoolManager()
-
             # we need access the website before query data
-            r = http.request('GET', TWSE_SERVER, timeout=10)
-
+            r.get(TWSE_SERVER, timeout=10)
             # query data
-            r = http.request('GET', query_url, timeout=10)
-
-            if r.status == 200:
-                self.json_data = r.data
-            else:
-                self.json_data = ''
-
+            self.json_data = r.get(query_url, timeout=10).content
         except:
             self.json_data = ''
 
@@ -172,8 +164,6 @@ class TaiwanStock:
             else:
                 if float(price) > 999.5:
                     price = '{0:.0f}'.format(float(price))
-                elif float(price) > 99.5:
-                    price = '{0:.1f}'.format(float(price))
 
             # check data time
             date = datetime.strptime(j["d"], '%Y%m%d')
@@ -278,15 +268,10 @@ class TaiwanStock:
         self.create_query_list(profile['show_twse_index'])
         # self.create_query_url(profile['show_twse_index'])
 
-        for i in self.query_list:
-            self.stock_query_str = self.stock_query_str + '|' + i
-
-        # remove first char '|'
-        self.stock_query_str = self.stock_query_str[1:]
-
         try:
-            self.query_stock_info()
-            self.parse_json_data()
+            for i in self.query_list:
+                self.query_stock_info(i)
+                self.parse_json_data()
         except:
             #traceback.print_exc()
             print 'TaiwanStock.get_data() failed'
@@ -363,14 +348,9 @@ class TaiwanFuture(HTMLParser):
 
     def get_data(self):
         try:
-            http = urllib3.PoolManager()
-            r = http.request('GET', TW_FUTURE_URL, timeout=10)
-            if r.status == 200:
-                self.feed(r.data)
-                self.close()
-                return self.read_data()
-            else:
-                return None
+            self.feed(urllib2.urlopen(TW_FUTURE_URL, timeout=10).read())
+            self.close()
+            return self.read_data()
         except:
             print 'TaiwanFuture.get_data() failed'
             #traceback.print_exc()
