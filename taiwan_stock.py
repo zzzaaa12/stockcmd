@@ -18,8 +18,9 @@ from setting import TW_FUTURE_URL
 class TaiwanStock:
     def __init__(self, argv):
         self.user_stock_list = USER_STOCK_LIST
-        self.stock_list = []
+        self.temp_list = []
         self.query_list = []
+        self.append_list = []
         self.stock_query_str = ''
         self.data = []
         self.twse_url = TWSE_SERVER + '/stock/api/getStockInfo.jsp?ex_ch='
@@ -30,17 +31,23 @@ class TaiwanStock:
     def append_stock(self, stock_no):
         if self.check_stock_no(stock_no) == False:
             return
-        if stock_no.upper() not in self.user_stock_list and stock_no.lower() not in self.user_stock_list:
-            self.user_stock_list.append(stock_no.upper())
+        stock_no = stock_no.upper()
+        if stock_no not in self.append_list:
+            self.append_list.append(stock_no)
 
     # remove stock in monitor mode
     def remove_stock(self, stock_no):
         if self.check_stock_no(stock_no) == False:
             return
-        if stock_no.upper() in self.user_stock_list:
-            self.user_stock_list.remove(stock_no.upper())
-        if stock_no.lower() in self.user_stock_list:
-            self.user_stock_list.remove(stock_no.lower())
+        stock_no = stock_no.upper()
+        if stock_no in self.append_list:
+            self.append_list.remove(stock_no)
+        elif stock_no in self.user_stock_list:
+            self.user_stock_list.remove(stock_no)
+
+        for x in self.argv:
+            if x.upper() == stock_no:
+                self.argv.remove(x)
 
     # check format of stock number
     def check_stock_no(self, stock_no):
@@ -48,29 +55,36 @@ class TaiwanStock:
             return False
         return True
 
-    def create_stock_list(self):
-        self.stock_list = []
+    def create_query_list(self, show_twse_index):
+        self.temp_list = []
+        self.query_list = []
 
-        # add stock in user_stock_list
+        # add stock from user_stock_list
         for x in self.user_stock_list:
-            if x.upper() not in self.stock_list:
-                self.stock_list.append(x.upper())
+            if x.upper() not in self.temp_list:
+                self.temp_list.append(x.upper())
 
-        # add stock in argv
+        # add stock from argv
         for x in self.argv:
             if self.check_stock_no(x) == False:
                 continue
-            if x.find('-') == -1 and x.upper() not in self.stock_list:
-                self.stock_list.append(x.upper())
+            if x.find('-') == -1 and x.upper() not in self.temp_list:
+                self.temp_list.append(x.upper())
 
-    def create_query_list(self, show_twse_index):
-        self.query_list = []
+        # add stock from append_list
+        for x in self.append_list:
+            if self.check_stock_no(x) == False:
+                continue
+            if x.upper() not in self.temp_list:
+                self.temp_list.append(x.upper())
 
+        # add twse / otc index
         if show_twse_index:
            self.query_list.append('tse_t00.tw')
            self.query_list.append('otc_o00.tw')
 
-        for stock_no in self.stock_list:
+        # search stock info in csv files
+        for stock_no in self.temp_list:
             found = False
             f = open('tse.csv', 'r')
             for row in csv.reader(f):
@@ -109,83 +123,87 @@ class TaiwanStock:
     def parse_json_data(self):
         if self.json_data.find('msgArray') == -1:
             return
-        now = datetime.now()
         json_data = json.loads(self.json_data)
 
         for i in range(len(json_data['msgArray'])):
+            # 1. Read JSON data
             try:
                 j = json_data['msgArray'][i]
                 price = j["z"]
+                price_last_day = j["y"]
                 stock_no = j["c"]
-                name     = j["n"]
+                stock_name = j["n"]
                 volume   = j["v"]
                 highest = float(j['h'])
                 lowest = float(j['l'])
+                stock_date = j["d"]
+                stock_time = j["t"]
             except:
                 continue
 
-            diff = float(j["z"]) - float(j["y"])
-            if diff > 0:
+            # 2. Price, Sign, Change, and Change Percentage
+            difference = float(j["z"]) - float(price_last_day)
+            if difference > 0:
                 sign = '+'
-            elif diff < 0:
+            elif difference < 0:
                 sign = ''
             else:
                 sign = ' '
+            change_str = sign + '{0:.2f}'.format(difference)
+            change_str_p = sign + '{0:.2f}'.format(difference / float(price_last_day) * 100)
 
-            change_str = sign + '{0:.2f}'.format(diff)
-            change_str_p = sign + '{0:.2f}'.format(diff / float(j["y"]) *100)
-
-            # status
-            status = ''
+            # 3. Status: Highest and Lowest
             if (float(price) == highest):
                 status = 'H'
             elif (float(price) == lowest):
                 status = 'L'
+            else:
+                status = ''
 
-            # I cannot found 'w' in 00633L
+            # 4. Status: Limit-Up and Limit-Down
             if stock_no != 't00' and stock_no != 'o00' and len(stock_no) == 4:
-                h_limit = float(j['u'])
-                l_limit = float(j['w'])
-                if (float(price) == h_limit):
-                    status = 'H-limit !!!'
-                elif (float(price) == l_limit):
-                    status = 'L-limit !!!'
+                limit_up = float(j['u'])
+                limit_down = float(j['w'])
+                if (float(price) == limit_up):
+                    status = 'L-UP'
+                elif (float(price) == limit_down):
+                    status = 'L-Down'
 
+            # 5. Override stock name, stock number, volume, and price
             if stock_no == 't00':
                 stock_no = 'TWSE'
-                name = u'上市'
+                stock_name = u'上市'
                 price = '{0:.0f}'.format(float(price))
-                change_str = sign + '{0:.0f} '.format(diff)
+                change_str = sign + '{0:.0f} '.format(difference)
                 volume = '{0:d}E'.format(int(volume)/100)
             elif stock_no == 'o00':
                 stock_no = 'OTC'
-                name = u'上櫃'
+                stock_name = u'上櫃'
                 volume = '{0:d}E'.format(int(volume)/100)
             else:
                 if float(price) > 999.5:
                     price = '{0:.0f}'.format(float(price))
 
-            # check data time
-            date = datetime.strptime(j["d"], '%Y%m%d')
-            result_time_str = j["d"] + ' ' + j["t"]
-            result_time = datetime.strptime(result_time_str, '%Y%m%d %H:%M:%S')
+            # 6. Read time and date
+            date = datetime.strptime(stock_date, '%Y%m%d')
+            now = datetime.now()
 
             if now.month == date.month and now.day == date.day:
                 if (now.hour > 13) or (now.hour == 13 and now.minute > 30):
-                    time_str = j["t"] + ' (today)'
+                    time_str = stock_time + ' (today)'
                 else:
-                    time_str = j["t"]
+                    time_str = stock_time
             else:
-                time_str = j["t"] + date.strftime(' (%m/%d)')
+                time_str = stock_time + date.strftime(' (%m/%d)')
 
             # FIXME: To avoid too long stock name
-            if len(name) > 4:
-                name = stock_no
+            if len(stock_name) > 4:
+                stock_name = stock_no
 
             # save to self.data
-            result = {'id':'', 'name':'', 'price':'', 'change':'', 'ratio':'', 'volume':'', 'time': '', 'H': '', 'L': '', 'status': ''}
-            result['id']     = stock_no
-            result['name']   = name
+            result = {'no':'', 'name':'', 'price':'', 'change':'', 'ratio':'', 'volume':'', 'time': '', 'H': '', 'L': '', 'status': ''}
+            result['no']     = stock_no
+            result['name']   = stock_name
             result['price']  = price
             result['change'] = change_str
             result['ratio']  = change_str_p
@@ -211,12 +229,12 @@ class TaiwanStock:
         print ''
 
         if not show_simple and len(self.data) > 0:
-            print colored(' 股號     股名   成交價    漲跌   百分比   成交量      股價區間        資料時間 & 狀態', color, attrs = color_attrs)
+            print colored(' 股號     股名   成交價    漲跌   百分比   成交量       股價區間        資料時間 & 狀態', color, attrs = color_attrs)
             print '-----------------------------------------------------------------------------------------------'
 
         for stock in self.data:
             if not show_twse_index:
-                if stock['id'] == 'TWSE' or stock['id'] == 'OTC' or stock['id'] == 'WTX':
+                if stock['no'] == 'TWSE' or stock['no'] == 'OTC' or stock['no'] == 'WTX':
                     continue
 
             if color_print:
@@ -232,19 +250,19 @@ class TaiwanStock:
                     color = 'white'
 
             if show_simple:
-                print colored(' {0:7s}'.format(stock['id'])
+                print colored(' {0:7s}'.format(stock['no'])
                       + '{0:>6s}'.format(stock['price'])
                       + '{0:>8s}'.format(stock['change'])
                       + '{0:>10s}'.format('(' + stock['ratio'] + '%)')
                       + '{0:>7s}'.format(stock['volume'])
                       + ' ' + stock['status'], color, attrs = color_attrs)
             else:
-                print colored(' {0:8s}'.format(stock['id'])
+                print colored(' {0:8s}'.format(stock['no'])
                       + stock['name'] + '\t'
                       + '{0:>7s}' .format(stock['price'])
                       + '{0:>9s}' .format(stock['change'])
                       + '{0:>7s}%'.format(stock['ratio'])
-                      + '{0:>8s}' .format(stock['volume'])
+                      + '{0:>9s}' .format(stock['volume'])
                       + '{0:>10s}'.format(stock['L'])
                       + ' ~ '
                       + '{0:<8s}'.format(stock['H'])
@@ -264,9 +282,7 @@ class TaiwanStock:
         if profile['show_twse_index']:
             self.add_tw_future()
 
-        self.create_stock_list()
         self.create_query_list(profile['show_twse_index'])
-        # self.create_query_url(profile['show_twse_index'])
 
         try:
             for i in self.query_list:
@@ -332,8 +348,8 @@ class TaiwanFuture(HTMLParser):
 
         change_str = sign + '{0:.0f} '.format(change)
         ratio_str = sign + ratio
-        result = {'id':'', 'name':'', 'price':'', 'change':'', 'ratio':'', 'volume':'', 'time': '', 'H': '', 'L': '', 'status': ''}
-        result['id']     = 'WTX'
+        result = {'no':'', 'name':'', 'price':'', 'change':'', 'ratio':'', 'volume':'', 'time': '', 'H': '', 'L': '', 'status': ''}
+        result['no']     = 'WTX'
         result['name']   = '台指期'
         result['price']  = '{0:.0f}'.format(price)
         result['change'] = change_str

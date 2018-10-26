@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import sys
 import select
+import time
 from os import system as system
 from time import sleep as sleep
 from datetime import datetime
@@ -87,10 +88,13 @@ def update_profile(profile, interval):
             refresh = True
         elif input == 'I':
             profile['show_twse_index'] = not profile['show_twse_index']
+            refresh = True
         elif input[:1] == '+' and len(input) > 1:
             profile['append_stock'] = input[1:]
+            refresh = True
         elif input[:1] == '-' and len(input) > 1:
             profile['remove_stock'] = input[1:]
+            refresh = True
         break
 
     return {'count':count, 'refresh':refresh}
@@ -105,6 +109,8 @@ def main():
 
     # if it is not monitor mode, just run once
     while True:
+        start_time = time.time()
+
         # read data
         tw_result = tw_stock.get_data(profile)
 
@@ -125,6 +131,7 @@ def main():
             exit()
 
         last_update_time = datetime.now().strftime('%Y.%m.%d %H:%M:%S')
+        print ' Elapsed time: {0:.2f}s'.format(time.time()-start_time)
         print ' Last updated: ' + last_update_time
         if profile['monitor_help']:
                 print ' Commands: Q->Exit, C->Color, S->Simple, I->TWSE, U->User\'s List,'
@@ -139,6 +146,7 @@ def main():
                 if tw_result:
                     # show old data within AUTO_UPDATE_SECOND
                     tw_stock.print_stock_info(profile)
+                print ' Updating.....'
                 print ' Last updated: ' + str(last_update_time)
                 if profile['monitor_help']:
                         print ' Commands: Q->Exit, C->Color, S->Simple, I->TWSE, U->User\'s List,'
