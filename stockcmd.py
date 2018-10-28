@@ -8,6 +8,7 @@ from time import sleep as sleep
 from datetime import datetime
 
 # files in this project
+from world_index import WorldIndex
 from taiwan_stock import TaiwanStock
 from setting import AUTO_UPDATE_SECOND
 from setting import DEFAULT_PROFILE
@@ -23,12 +24,14 @@ def usage():
     print '    -a: list all stock infomation (include TSE, OTC, other stock)'
     print '    -s: list information with simple format'
     print '    -i: list include TSE index and OTC index'
+    print '    -w: list International Stock Indexes'
     print '    -c: list with color'
     print '    -d: continue update information every ' + str(AUTO_UPDATE_SECOND) + ' seconds'
     print '    -h: show this page'
     print ''
     print 'Example:'
     print '    stockcmd.py -i'
+    print '    stockcmd.py -w'
     print '    stockcmd.py -u'
     print '    stockcmd.py 2330 2317 3008'
     print ''
@@ -45,7 +48,10 @@ def read_option(opt):
         if str(x) == '-c':
             profile['color_print'] = True
         elif str(x) == '-a':
+            profile['show_world_index'] = True
             profile['show_twse_index'] = True
+        elif str(x) == '-w':
+            profile['show_world_index'] = True
         elif str(x) == '-i':
             profile['show_twse_index'] = True
         elif str(x) == '-s':
@@ -89,6 +95,9 @@ def update_profile(profile, interval):
         elif input == 'I':
             profile['show_twse_index'] = not profile['show_twse_index']
             refresh = True
+        elif input == 'W':
+            profile['show_world_index'] = not profile['show_world_index']
+            refresh = True
         elif input[:1] == '+' and len(input) > 1:
             profile['append_stock'] = input[1:]
             refresh = True
@@ -105,17 +114,27 @@ def main():
     # remove program name
     del argv[0]
     profile = read_option(argv)
+
+    # create objects
+    world = WorldIndex()
+    world_result = False
     tw_stock = TaiwanStock(argv)
 
     # if it is not monitor mode, just run once
     while True:
         start_time = time.time()
+        time_diff1 = 0
+        time_diff2 = 0
 
         # read data
+        if profile['show_world_index']:
+            world_result = world.get_data()
+        time_diff1 = time.time() - start_time
+
         tw_result = tw_stock.get_data(profile)
 
         # show usage page when no stock or index
-        if tw_result == False:
+        if tw_result == False and profile['show_world_index'] == False:
             usage()
             exit()
 
@@ -123,19 +142,27 @@ def main():
         if profile['monitor_mode']:
             system('clear')
 
+        # print world index
+        if profile['show_world_index'] and world_result:
+            world.print_stock_info(profile)
+
         # print tw stock
         if tw_result:
             tw_stock.print_stock_info(profile)
 
+        last_update_time = datetime.now().strftime('%Y.%m.%d %H:%M:%S')
+        time_diff2 = time.time() - start_time
+        print ' Elapsed time: {0:.2f}s + {1:.2f}s = {2:.2f}s'.format(time_diff1, time_diff2, time_diff1 + time_diff2)
+        print ' Last updated: ' + last_update_time
+        print ''
+
+        # motitor mode
         if not profile['monitor_mode']:
             exit()
 
-        last_update_time = datetime.now().strftime('%Y.%m.%d %H:%M:%S')
-        print ' Elapsed time: {0:.2f}s'.format(time.time()-start_time)
-        print ' Last updated: ' + last_update_time
         if profile['monitor_help']:
-                print ' Commands: Q->Exit, C->Color, S->Simple, I->TWSE, U->User\'s List,'
-                print '           +-[stock] -> add or remove stock'
+                print ' Commands: Q->Exit, C->Color, S->Simple, I->TWSE, W->World, U->User\'s List'
+                print '           X->Hide closed index,  +-[stock] -> add or remove stock'
 
         # renew profile
         update = update_profile(profile, AUTO_UPDATE_SECOND)
@@ -143,14 +170,16 @@ def main():
         while update_count < AUTO_UPDATE_SECOND:
             if update['refresh']:
                 system('clear')
+                if profile['show_world_index'] and world_result:
+                    world.print_stock_info(profile)
                 if tw_result:
                     # show old data within AUTO_UPDATE_SECOND
                     tw_stock.print_stock_info(profile)
                 print ' Updating.....'
                 print ' Last updated: ' + str(last_update_time)
                 if profile['monitor_help']:
-                        print ' Commands: Q->Exit, C->Color, S->Simple, I->TWSE, U->User\'s List,'
-                        print '           +-[stock] -> add or remove stock'
+                        print ' Commands: Q->Exit, C->Color, S->Simple, I->TWSE, W->World, U->User\'s List'
+                        print '           X->Hide closed index,  +-[stock] -> add or remove stock'
 
             else:
                 print 'The setting will apply after ' + str(AUTO_UPDATE_SECOND - update_count) + ' secs'
