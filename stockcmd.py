@@ -21,10 +21,11 @@ def usage():
     print '    stockcmd.py [Options] [stock numbers]'
     print ''
     print 'Options:'
-    print '    -a: list all stock infomation (include TSE, OTC, other stock)'
-    print '    -s: list information with simple format'
-    print '    -i: list include TSE index and OTC index'
-    print '    -w: list International Stock Indexes'
+    print '    -a: show all stock infomation (include TSE, OTC, other stock)'
+    print '    -s: show information with simple format'
+    print '    -i: show TWSE index, TWSE Future and OTC index'
+    print '    -t: show TWSE stocks (includes user list)'
+    print '    -w: show International Stock Indexes'
     print '    -c: list with color'
     print '    -d: continue update information every ' + str(AUTO_UPDATE_SECOND) + ' seconds'
     print '    -h: show this page'
@@ -43,9 +44,9 @@ def monitor_help():
     print '      X->Hide closed index, +-[stock] -> add or remove stock'
 
 
-def elapsed_time(d1, d2, last):
+def elapsed_time(time_diff, last):
     print ''
-    print ' Elapsed time: {0:.2f}s + {1:.2f}s = {2:.2f}s'.format(d1, d2, d1 + d2)
+    print ' Elapsed time: {0:.2f}s'.format(time_diff)
     print ' Last updated: ' + last
 
 
@@ -62,10 +63,13 @@ def read_option(opt):
         elif str(x) == '-a':
             profile['show_world_index'] = True
             profile['show_twse_index'] = True
+            profile['show_tw_stock'] = True
         elif str(x) == '-w':
             profile['show_world_index'] = True
         elif str(x) == '-i':
             profile['show_twse_index'] = True
+        elif str(x) == '-t':
+            profile['show_tw_stock'] = True
         elif str(x) == '-s':
             profile['show_simple'] = True
             profile['monitor_help'] = False
@@ -107,6 +111,9 @@ def update_profile(profile, interval):
         elif input == 'I':
             profile['show_twse_index'] = not profile['show_twse_index']
             refresh = True
+        elif input == 'T':
+            profile['show_tw_stock'] = not profile['show_tw_stock']
+            refresh = True
         elif input == 'W':
             profile['show_world_index'] = not profile['show_world_index']
             refresh = True
@@ -135,18 +142,16 @@ def main():
     # if it is not monitor mode, just run once
     while True:
         start_time = time.time()
-        time_diff1 = 0
-        time_diff2 = 0
+        time_diff = 0
 
         # read data
         if profile['show_world_index']:
             world_result = world.get_data()
-        time_diff1 = time.time() - start_time
 
         tw_result = tw_stock.get_data(profile)
 
         # show usage page when no stock or index
-        if tw_result == False and world_result == False and profile['show_world_index'] == False:
+        if tw_result == False and world_result == False:
             usage()
             exit()
 
@@ -163,8 +168,8 @@ def main():
             tw_stock.print_stock_info(profile)
 
         last_update_time = datetime.now().strftime('%Y.%m.%d %H:%M:%S')
-        time_diff2 = time.time() - start_time
-        elapsed_time(time_diff1, time_diff2, last_update_time)
+        time_diff = time.time() - start_time
+        elapsed_time(time_diff, last_update_time)
 
         # motitor mode
         if not profile['monitor_mode']:
@@ -192,6 +197,8 @@ def main():
                     renew_now = True
                 elif profile['show_twse_index']:
                     renew_now = True
+                elif profile['show_tw_stock']:
+                    renew_now = True
 
                 if renew_now:
                     print 'Updating.....'
@@ -205,7 +212,6 @@ def main():
                     # show old data within AUTO_UPDATE_SECOND
                     tw_stock.print_stock_info(profile)
 
-                elapsed_time(time_diff1, time_diff2, last_update_time)
                 if profile['monitor_help']:
                     monitor_help()
 

@@ -31,6 +31,7 @@ AUTO_UPDATE_SECOND = 20
 
 DEFAULT_PROFILE = {
     'color_print'         : False,
+    'show_tw_stock'       : False,
     'show_twse_index'     : False,
     'show_world_index'    : False,
     'show_simple'         : False,

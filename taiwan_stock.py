@@ -55,7 +55,7 @@ class TaiwanStock:
             return False
         return True
 
-    def create_query_list(self, show_twse_index):
+    def create_query_list(self, show_twse_index, show_tw_stock):
         self.temp_list = []
         self.query_list = []
 
@@ -78,31 +78,31 @@ class TaiwanStock:
             if x.upper() not in self.temp_list:
                 self.temp_list.append(x.upper())
 
-        # add twse / otc index
+        # add twse index / otc index
         if show_twse_index:
            self.query_list.append('tse_t00.tw')
            self.query_list.append('otc_o00.tw')
 
-        # search stock info in csv files
-        for stock_no in self.temp_list:
-            found = False
-            f = open('tse.csv', 'r')
-            for row in csv.reader(f):
-                if row[0] == str(stock_no):
-                    self.query_list.append('tse_' + stock_no + '.tw')
-                    found = True
-                    break
-            f.close()
-            if not found:
-                f = open('otc.csv', 'r')
+        # add tw stocks
+        if show_tw_stock:
+            # search stock info in csv files
+            for stock_no in self.temp_list:
+                found = False
+                f = open('tse.csv', 'r')
                 for row in csv.reader(f):
                     if row[0] == str(stock_no):
-                        self.query_list.append('otc_' + stock_no + '.tw')
+                        self.query_list.append('tse_' + stock_no + '.tw')
                         found = True
                         break
                 f.close()
-
-        #print self.query_list
+                if not found:
+                    f = open('otc.csv', 'r')
+                    for row in csv.reader(f):
+                        if row[0] == str(stock_no):
+                            self.query_list.append('otc_' + stock_no + '.tw')
+                            found = True
+                            break
+                    f.close()
 
 
     def query_stock_info(self, stock_str):
@@ -284,7 +284,7 @@ class TaiwanStock:
         if profile['show_twse_index']:
             self.add_tw_future()
 
-        self.create_query_list(profile['show_twse_index'])
+        self.create_query_list(profile['show_twse_index'], profile['show_tw_stock'])
 
         try:
             for i in self.query_list:
