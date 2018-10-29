@@ -84,7 +84,11 @@ class WorldIndex:
                 x['percent'] = '+' + x['percent']
 
 
+
     def print_stock_info(self, profile):
+        if len(self.data) == 0:
+            return
+
         hide_closed = profile['hide_closed_index']
         show_simple = profile['show_simple']
         color_print = profile['color_print']
@@ -96,6 +100,7 @@ class WorldIndex:
             color = 'white'
 
         print ''
+
         if not show_simple:
             print colored(' 代號        指數          點數        漲跌      百分比', color, attrs = color_attrs)
             print '-----------------------------------------------------------'

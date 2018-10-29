@@ -216,6 +216,9 @@ class TaiwanStock:
 
 
     def print_stock_info(self, profile):
+        if len(self.data) == 0:
+            return
+
         show_twse_index = profile['show_twse_index']
         show_simple = profile['show_simple']
         color_print = profile['color_print']
@@ -228,7 +231,7 @@ class TaiwanStock:
 
         print ''
 
-        if not show_simple and len(self.data) > 0:
+        if not show_simple:
             print colored(' 股號     股名   成交價    漲跌   百分比   成交量       股價區間        資料時間 & 狀態', color, attrs = color_attrs)
             print '-----------------------------------------------------------------------------------------------'
 
@@ -267,7 +270,6 @@ class TaiwanStock:
                       + ' ~ '
                       + '{0:<8s}'.format(stock['H'])
                       + '  ' + stock['time'] + ' ' + stock['status'], color, attrs = color_attrs)
-        print ''
 
 
     def add_tw_future(self):

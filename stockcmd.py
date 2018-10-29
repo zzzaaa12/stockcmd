@@ -37,6 +37,18 @@ def usage():
     print ''
 
 
+def monitor_help():
+    print ''
+    print ' Commands: Q->Exit, C->Color, S->Simple, I->TWSE, W->World, U->User\'s List'
+    print '      X->Hide closed index, +-[stock] -> add or remove stock'
+
+
+def elapsed_time(d1, d2, last):
+    print ''
+    print ' Elapsed time: {0:.2f}s + {1:.2f}s = {2:.2f}s'.format(d1, d2, d1 + d2)
+    print ' Last updated: ' + last
+
+
 def read_option(opt):
     if len(opt) == 0:
         usage()
@@ -134,7 +146,7 @@ def main():
         tw_result = tw_stock.get_data(profile)
 
         # show usage page when no stock or index
-        if tw_result == False and profile['show_world_index'] == False:
+        if tw_result == False and world_result == False and profile['show_world_index'] == False:
             usage()
             exit()
 
@@ -152,34 +164,50 @@ def main():
 
         last_update_time = datetime.now().strftime('%Y.%m.%d %H:%M:%S')
         time_diff2 = time.time() - start_time
-        print ' Elapsed time: {0:.2f}s + {1:.2f}s = {2:.2f}s'.format(time_diff1, time_diff2, time_diff1 + time_diff2)
-        print ' Last updated: ' + last_update_time
-        print ''
+        elapsed_time(time_diff1, time_diff2, last_update_time)
 
         # motitor mode
         if not profile['monitor_mode']:
             exit()
 
         if profile['monitor_help']:
-                print ' Commands: Q->Exit, C->Color, S->Simple, I->TWSE, W->World, U->User\'s List'
-                print '           X->Hide closed index,  +-[stock] -> add or remove stock'
+            monitor_help()
 
         # renew profile
         update = update_profile(profile, AUTO_UPDATE_SECOND)
         update_count = update['count']
+        renew_now = False
         while update_count < AUTO_UPDATE_SECOND:
             if update['refresh']:
+
+                if profile['show_world_index'] and world_result == False:
+                    renew_now = True
+                elif len(profile['append_stock']):
+                    tw_stock.append_stock(profile['append_stock'])
+                    profile['append_stock'] = ''
+                    renew_now = True
+                elif len(profile['remove_stock']):
+                    tw_stock.remove_stock(profile['remove_stock'])
+                    profile['remove_stock'] = ''
+                    renew_now = True
+                elif profile['show_twse_index']:
+                    renew_now = True
+
+                if renew_now:
+                    print 'Updating.....'
+                    break
+
                 system('clear')
                 if profile['show_world_index'] and world_result:
                     world.print_stock_info(profile)
+
                 if tw_result:
                     # show old data within AUTO_UPDATE_SECOND
                     tw_stock.print_stock_info(profile)
-                print ' Updating.....'
-                print ' Last updated: ' + str(last_update_time)
+
+                elapsed_time(time_diff1, time_diff2, last_update_time)
                 if profile['monitor_help']:
-                        print ' Commands: Q->Exit, C->Color, S->Simple, I->TWSE, W->World, U->User\'s List'
-                        print '           X->Hide closed index,  +-[stock] -> add or remove stock'
+                    monitor_help()
 
             else:
                 print 'The setting will apply after ' + str(AUTO_UPDATE_SECOND - update_count) + ' secs'
@@ -187,13 +215,6 @@ def main():
             update = update_profile(profile, AUTO_UPDATE_SECOND - update_count)
             update_count = update_count + update['count']
 
-        # append or remove stock
-        if len(profile['append_stock']):
-            tw_stock.append_stock(profile['append_stock'])
-            profile['append_stock'] = ''
-        elif len(profile['remove_stock']):
-            tw_stock.remove_stock(profile['remove_stock'])
-            profile['remove_stock'] = ''
 
 if __name__ == '__main__':
     main()
