@@ -38,6 +38,7 @@ DEFAULT_PROFILE = {
     'monitor_mode'        : False,
     'monitor_help'        : True,
     'hide_closed_index'   : False,
+    'refresh_now'         : False,
     'append_stock': '',
     'remove_stock': ''
 }
