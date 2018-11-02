@@ -20,7 +20,7 @@ INDEX_LIST = [ \
               ['A50F',      'A50',       'A50期貨 '], \
               ['VIX',       'VIX',       'SP500VIX'], \
               ['VIXTWN',    'TW-VIX',    '台指VIX '], \
-              ['WGD',       'Gold',      '黃金期貨'], \
+              ['GOLD',      'Gold',      '黃金現貨'], \
               ['OIL',       'Oil',       '紐約原油'], \
 #              ['NAS',       'NASDAQ',    '那斯達克'], \
 #              ['SPS',       'S&P500',    'S&P 500 '], \

@@ -144,6 +144,7 @@ def main():
     world = WorldIndex()
     world_result = False
     tw_stock = TaiwanStock(argv)
+    tw_result = False
 
     # if it is not monitor mode, just run once
     while True:

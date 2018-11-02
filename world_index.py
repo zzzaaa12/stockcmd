@@ -25,7 +25,7 @@ class WorldIndex:
                 'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36',
                 })
 
-        r = requests.get(self.query_url, headers=headers)
+        r = requests.get(self.query_url, headers=headers, timeout=10)
         if r.status_code != 200 or len(r.text) < 10000:
             print 'HTTP Status: ' + r.status_code
             print 'Data Length: ' + len(r.text)
