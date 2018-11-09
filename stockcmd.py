@@ -33,7 +33,7 @@ def usage():
     print 'Example:'
     print '    stockcmd.py -i'
     print '    stockcmd.py -w'
-    print '    stockcmd.py -u'
+    print '    stockcmd.py -t -s'
     print '    stockcmd.py 2330 2317 3008'
     print ''
 
@@ -157,11 +157,6 @@ def main():
         if profile['show_tw_stock']:
             tw_result = tw_stock.get_data(profile)
 
-        # show usage page when no stock or index
-        #if tw_result == False and world_result == False:
-        #    usage()
-        #    exit()
-
         # clear monitor
         if profile['monitor_mode']:
             system('clear')
@@ -171,7 +166,7 @@ def main():
             world.print_stock_info(profile)
 
         # print tw stock
-        if tw_result:
+        if profile['show_tw_stock'] and tw_result:
             tw_stock.print_stock_info(profile)
 
         last_update_time = datetime.now().strftime('%Y.%m.%d %H:%M:%S')

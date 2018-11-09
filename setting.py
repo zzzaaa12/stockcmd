@@ -11,17 +11,19 @@ WORLD_INDEX_URL = 'https://www.wantgoo.com/global/api/getglobaldefault'
 
 INDEX_LIST = [ \
               ['0000',      'TWSE',      '加權指數'], \
-              ['WTXM',      'WTX',       '台指期全'], \
+              ['WTXM',      'WTX-All',   '台指期全'], \
               ['USDTWD',    'TWD',       '台幣匯率'], \
-              ['USDINDEX',  'DXY',       '美元指數'], \
               ['B1YM',      'DOWF',      '小道瓊期'], \
               ['NKI',       'JAPAN',     '日經指數'], \
               ['KOR',       'KOREA',     '韓國指數'], \
               ['A50F',      'A50',       'A50期貨 '], \
               ['VIX',       'VIX',       'SP500VIX'], \
-              ['VIXTWN',    'TW-VIX',    '台指VIX '], \
+              ['DAX',       'DAX',       '德國指數'], \
+              ['USDINDEX',  'DXY',       '美元指數'], \
+              ['US10-YR',   'US10-YR',   '十年美債'], \
               ['GOLD',      'Gold',      '黃金現貨'], \
               ['OIL',       'Oil',       '紐約原油'], \
+              ['bitcoin',   'BTC',       '比特幣  '], \
 #              ['NAS',       'NASDAQ',    '那斯達克'], \
 #              ['SPS',       'S&P500',    'S&P 500 '], \
             ]
