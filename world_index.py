@@ -71,8 +71,12 @@ class WorldIndex:
                     break
 
             # round to 2 decimal places
-            x['price'] = '{0:.2f}'.format(float(x['price']))
-            x['change'] = '{0:.2f}'.format(float(x['change']))
+            if x['price'] < 10:
+                x['price'] = '{0:.4f}'.format(float(x['price']))
+                x['change'] = '{0:.4f}'.format(float(x['change']))
+            else:
+                x['price'] = '{0:.2f}'.format(float(x['price']))
+                x['change'] = '{0:.2f}'.format(float(x['change']))
             x['percent'] = '{0:.2f}'.format(float(x['percent']))
 
             # sing of change and percent

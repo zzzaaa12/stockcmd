@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # taiwan stock setting
-USER_STOCK_LIST = ['2330','2317','3008','6142','00682U','00664R','00666R', '00659R','00671R', '00677U']
+USER_STOCK_LIST = ['2330','2317','3008','6142','00632R','00664R','00659R', '00677U','00662', '2441']
 TWSE_SERVER = 'http://220.229.103.179' # mis.twse.com.tw
 TW_FUTURE_URL = 'http://info512.taifex.com.tw/Future/FusaQuote_Norl.aspx' # info512.taifex.com.tw
 
@@ -17,6 +17,7 @@ INDEX_LIST = [ \
               ['M1NQ',      'NAS-F',     'NASDAQ期'], \
               ['NKI',       'JAPAN',     '日經指數'], \
               ['KOR',       'KOREA',     '韓國指數'], \
+              ['SHI',       'SHI',       '上證指數'], \
               ['A50F',      'A50',       'A50期貨 '], \
               ['HSI',       'HSI',       '恆生指數'], \
               ['VIX',       'VIX',       'SP500VIX'], \
