@@ -19,6 +19,39 @@ class WorldIndex:
         self.data = []
 
 
+    def replace_coin_price(self, coin, price, percent, change):
+        for i in self.data:
+            if i['id'] == coin:
+                i['price'] = '{0:.2f}'.format(price)
+                i['percent'] = '{0:.2f}'.format(percent)
+                i['change'] = '{0:.2f}'.format(change)
+
+                if change > 0:
+                    i['percent'] = '+' + i['percent']
+                    i['change'] = '+' + i['change']
+                break
+
+
+    def get_btc_price(self):
+        coin_query_url = "https://api.coinmarketcap.com/v2/ticker/?limit=2"
+
+        r = requests.get(coin_query_url, timeout=10)
+        if r.status_code == 200:
+            j = json.loads(r.text)
+
+            # BTC
+            price = float(j['data']['1']['quotes']['USD']['price'])
+            percent = float(j['data']['1']['quotes']['USD']['percent_change_24h'])
+            change = price * percent/100
+            self.replace_coin_price('BTC', price, percent, change)
+
+            # ETH
+            price = float(j['data']['1027']['quotes']['USD']['price'])
+            percent = float(j['data']['1027']['quotes']['USD']['percent_change_24h'])
+            change = price * percent/100
+            self.replace_coin_price('ETH', price, percent, change)
+
+
     def query_stock_info(self):
         headers = requests.utils.default_headers()
         headers.update({
@@ -138,6 +171,7 @@ class WorldIndex:
             if self.query_stock_info() == False:
                 return False
             self.parse_json_data()
+            self.get_btc_price()
         except:
             traceback.print_exc()
             return False
