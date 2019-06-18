@@ -12,7 +12,6 @@ WORLD_INDEX_URL = 'https://www.wantgoo.com/global/api/getglobaldefault'
 INDEX_LIST = [ \
               ['0000',      'TWSE',      '加權指數'], \
               ['WTXM',      'WTX-All',   '台指期全'], \
-              ['USDTWD',    'TWD',       '台幣匯率'], \
               ['B1YM',      'DOW-F',     '小道瓊期'], \
               ['M1NQ',      'NAS-F',     'NASDAQ期'], \
               ['NKI',       'JAPAN',     '日經指數'], \
@@ -22,12 +21,15 @@ INDEX_LIST = [ \
               ['HSI',       'HSI',       '恆生指數'], \
               ['VIX',       'VIX',       'SP500VIX'], \
               ['DAX',       'DAX',       '德國指數'], \
-              ['USDINDEX',  'DXY',       '美元指數'], \
-              ['US10-YR',   'US10-YR',   '十年美債'], \
               ['GOLD',      'Gold',      '黃金現貨'], \
               ['OIL',       'Oil',       '紐約原油'], \
+              ['US10-YR',   'US10-YR',   '十年美債'], \
+              ['USDINDEX',  'DXY',       '美元指數'], \
+              ['USDTWD',    'TWD',       '台幣匯率'], \
+              ['USDCNY',    'RMB',       '人民幣'], \
+              ['USDJPY',    'USDJPY',    '日幣    '], \
               ['bitcoin',   'BTC',       '比特幣  '], \
-              ['ethereum',  'ETH',       '以太幣  '], \
+              ['ethereum',  'ETH',       '以太坊  '], \
 #              ['NAS',       'NASDAQ',    '那斯達克'], \
 #              ['SPS',       'S&P500',    'S&P 500 '], \
             ]
